@@ -26,19 +26,19 @@ Model::Model(int argc, char *argv[]) {
 
     if (std::stod(argv[3]) <= 0) {
         throw std::invalid_argument("Final Time must be greater than 0!");
-    } else {
-        T = std::stod(argv[3]);
     }
+    T = std::stod(argv[3]);
 
 
-    // Timestep & space discretisation validation and parse
+
+    // Timestep & space discretisation validation and parse - check for -ve input
     if (std::stoi(argv[4]) <= 0 || std::stoi(argv[5]) <= 0 || std::stoi(argv[6]) <= 0) {
         throw std::invalid_argument("Number of timesteps/grid points must be greater than 0!");
-    } else {
-        Nx = std::stoul(argv[4]);
-        Ny = std::stoul(argv[5]);
-        Nt = std::stoul(argv[6]);
     }
+    Nx = std::stoul(argv[4]);
+    Ny = std::stoul(argv[5]);
+    Nt = std::stoul(argv[6]);
+
 
     ax = std::stod(argv[7]);
     ay = std::stod(argv[8]);

@@ -11,35 +11,28 @@
 class Model {
     friend class Burgers;
 public:
+
+    // * * * * * * * * * * * * * * CONSTRUCTOR * * * * * * * * * * * * * * * * //
     Model(int argc, char *argv[]);
-
+    // * * * * * * * * * * * * * * DESTRUCTOR  * * * * * * * * * * * * * * * * //
     ~Model();
-
+    // * * * * * * * * * * * * * * MEMBER FUNCTIONS  * * * * * * * * * * * * * //
     void PrintParameters();
 
-    bool IsValid(); // think about writing this and calling immediately after initialisation?
+    bool IsValid(); ///< think about writing this and calling immediately after initialisation?
 
-    // Getters t
-    //bool   IsVerbose() const { return verbose; } ///< tells user what it does (Extra information)
-    //bool   IsHelp()    const { return help; } ///< print out available command line options
+    // bool   IsVerbose() const { return verbose; } ///< tells user what it does (Extra information)
+    // bool   IsHelp()    const { return help; } ///< print out available command line options
+
     double GetX0() const { return x0; }
-
     double GetY0() const { return y0; }
-
     double GetLx() const { return Lx; }
-
     double GetLy() const { return Ly; }
-
     double GetT() const { return T; }
-
     int GetNx() const { return Nx; }
-
     int GetNy() const { return Ny; }
-
     int GetNt() const { return Nt; }
-
     double GetDx() const { return dx; }
-
     double GetDy() const { return dy; }
 
     double GetDt() const { return dt; }
