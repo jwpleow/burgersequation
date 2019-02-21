@@ -9,7 +9,7 @@
 */
 
 class Model {
-    friend class Burgers;
+friend class Burgers;
 public:
 
     // * * * * * * * * * * * * * * CONSTRUCTOR * * * * * * * * * * * * * * * * //

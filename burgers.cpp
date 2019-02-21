@@ -27,7 +27,11 @@ int main(int argc, char* argv[]) {
     m.PrintParameters();
     Burgers b(m);
     b.SetVelField(m);
-    b.DisplayxVelField(m);
+    b.DisplayuVelField(m);
+    b.TimeIntegrateVelField(m);
+    b.DisplayuVelField(m);
+    b.PrintVelFields(m);
+
 
 //    // Call code to initialise the problem here
 //

@@ -106,7 +106,7 @@ void Burgers::PrintVelFields(Model &A) {
     //open file
     std::ofstream vMyFile("VelocityFields.txt");
     if (vMyFile.good()) {
-        vMyFile << "Current u Velocity Field: \n";
+        vMyFile << "Current u Velocity Field:" << std::endl;
 
         for (int i = 0; i < A.Ny; ++i) { ///< i is the row index
             for (int j = 0; j < A.Nx; ++j) { ///< j is the column index
