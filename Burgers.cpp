@@ -35,7 +35,6 @@ void Burgers::SetVelField(Model& A) {
     for (int i = 0; i < A.Nx; ++i) { ///< i is the column index
         for (int j = 0; j < A.Ny; ++j) { ///< j is the row index
             r = sqrt((A.x0 + i * A.dx) * (A.x0 + i * A.dx) + (A.y0 + j * A.dy) * (A.y0 + j * A.dy));
-            std::cout << r << ' ';
             if (r <= 1.0) {
                 udata_[A.Ny * i + j] = 2.0 * pow(1.0-r,4) * (4.0*r + 1);
                 vdata_[A.Ny * i + j] = 2.0 * pow(1.0-r,4) * (4.0*r + 1);
@@ -72,19 +71,67 @@ void Burgers::DisplayvVelField(Model &A) {
 void Burgers::TimeIntegrateVelField(Model &A) {
 
     // Initialise placeholder values required for the Forward Euler Explicit Method
-    double u_n, v_n;
+    double u_n;
 
-    for (int i = 1; i < A.Nx-1; ++i){
-        for (int j = 1; j < A.Ny-1; ++j){
+    for (int t = 0; t < A.Nt; ++t) {
+        for (int i = 1; i < A.Nx - 1; ++i) {
+            for (int j = 1; j < A.Ny - 1; ++j) {
 
-            u_n = udata_[A.Ny * i + j]; ///< Store the current value for use in determining v
-            udata_[A.Ny * i + j] +=
+                u_n = udata_[A.Ny * i + j]; ///< Store the current value for use in determining v
 
+                udata_[A.Ny * i + j] += A.dt * (A.c * ((udata_[A.Ny * (i + 1) + j] - 2.0 * udata_[A.Ny * i + j] +
+                                                        udata_[A.Ny * (i - 1) + j]) / (A.dx * A.dx) +
+                                                       (udata_[A.Ny * i + (j + 1)] - 2.0 * udata_[A.Ny * i + j] +
+                                                        udata_[A.Ny * i + (j - 1)]) / (A.dy * A.dy))
+                                                - (A.ay + A.b * vdata_[A.Ny * i + j]) *
+                                                  ((udata_[A.Ny * i + j] - udata_[A.Ny * i + (j - 1)]) / A.dy)
+                                                - (A.ax + A.b * udata_[A.Ny * i + j]) *
+                                                  ((udata_[A.Ny * i + j] - udata_[A.Ny * (i - 1) + j]) / A.dx));
+                vdata_[A.Ny * i + j] += A.dt * (A.c * ((vdata_[A.Ny * (i + 1) + j] - 2.0 * vdata_[A.Ny * i + j] +
+                                                        vdata_[A.Ny * (i - 1) + j]) / (A.dx * A.dx) +
+                                                       (vdata_[A.Ny * i + (j + 1)] - 2.0 * vdata_[A.Ny * i + j] +
+                                                        vdata_[A.Ny * i + (j - 1)]) / (A.dy * A.dy))
+                                                - (A.ay + A.b * vdata_[A.Ny * i + j]) *
+                                                  ((vdata_[A.Ny * i + j] - vdata_[A.Ny * i + (j - 1)]) / A.dy)
+                                                - (A.ax + A.b * u_n) *
+                                                  ((vdata_[A.Ny * i + j] - vdata_[A.Ny * (i - 1) + j]) / A.dx));
+
+            }
         }
     }
-
-
 }
+
+
+void Burgers::PrintVelFields(Model &A) {
+    //open file
+    std::ofstream vMyFile("VelocityFields.txt");
+    if (vMyFile.good()) {
+        vMyFile << "Current u Velocity Field: \n";
+
+        for (int i = 0; i < A.Ny; ++i) { ///< i is the row index
+            for (int j = 0; j < A.Nx; ++j) { ///< j is the column index
+
+                vMyFile << udata_[A.Ny * j + i] << ' ';
+            }
+            vMyFile << '\n';
+        }
+        std::cout << "Velocity Files printed to VelocityFields.txt.";
+    } else throw std::runtime_error("File could not be opened for writing.");
+
+    vMyFile.close();
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

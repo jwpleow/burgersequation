@@ -10,8 +10,10 @@
 #include <iostream>
 #include <cmath>
 #include <iomanip>
+#include <fstream>
 
 class Burgers {
+
 public:
     // * * * * * * * * * * * * * * CONSTRUCTOR * * * * * * * * * * * * * * * * //
 
@@ -34,6 +36,9 @@ public:
 
 
     void TimeIntegrateVelField(Model &A);
+
+    // Function to print the velocity fields to a file
+    void PrintVelFields(Model &A);
 
 
     unsigned long xsize() const { return xsize_; } ///< Return x Size
