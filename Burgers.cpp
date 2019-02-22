@@ -106,15 +106,25 @@ void Burgers::PrintVelFields(Model &A) {
     //open file
     std::ofstream vMyFile("VelocityFields.txt");
     if (vMyFile.good()) {
-        vMyFile << "Current u Velocity Field:" << std::endl;
+
+        vMyFile << "Current u Velocity Field: \n";   // think about flipping this to correct y axis
 
         for (int i = 0; i < A.Ny; ++i) { ///< i is the row index
             for (int j = 0; j < A.Nx; ++j) { ///< j is the column index
-
-                vMyFile << udata_[A.Ny * j + i] << ' ';
+                vMyFile << std::fixed << std::setprecision(4) << std::scientific << udata_[A.Ny * j + i] << ' ';
             }
             vMyFile << '\n';
         }
+
+        vMyFile << "Current v Velocity Field: \n";
+
+        for (int i = 0; i < A.Ny; ++i) { ///< i is the row index
+            for (int j = 0; j < A.Nx; ++j) { ///< j is the column index
+                vMyFile << std::fixed << std::setprecision(4) << std::scientific << vdata_[A.Ny * j + i] << ' ';
+            }
+            vMyFile << '\n';
+        }
+
         std::cout << "Velocity Files printed to VelocityFields.txt.";
     } else throw std::runtime_error("File could not be opened for writing.");
 
@@ -126,7 +136,27 @@ void Burgers::PrintVelFields(Model &A) {
 
 
 
+double Burgers::EnergyOfVelField(Model &A) {
+    double* usquare;
+    double* vsquare;
+    usquare = new double[A.Nx*A.Ny]();
+    vsquare = new double[A.Nx*A.Ny]();
+    double usquaresum, vsquaresum;
 
+
+    // Perform the square of the u and v terms
+    F77NAME(dsbmv)('U', A.Nx*A.Ny , 0, 1.0, udata_ , 1, udata_ , 1, 0, usquare, 1);
+    F77NAME(dsbmv)('U', A.Nx*A.Ny , 0, 1.0, vdata_ , 1, vdata_ , 1, 0, vsquare, 1); // check the unsigned long -> signed int conv
+
+    // Sum the terms
+    usquaresum=F77NAME(dasum)(A.Nx*A.Ny , usquare , 1);
+    vsquaresum=F77NAME(dasum)(A.Nx*A.Ny , vsquare , 1);
+
+    delete[] usquare;
+    delete[] vsquare;
+    return 0.5*(usquaresum + vsquaresum)*A.dx*A.dy;
+
+}
 
 
 
