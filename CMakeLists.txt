@@ -3,4 +3,8 @@ project(Coursework)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(Coursework main.cpp burgers.cpp Model.cpp Burgers.cpp)
+find_package(BLAS REQUIRED)
+
+add_executable(Coursework burgers.cpp Model.cpp Burgers.cpp)
+
+target_link_libraries(Coursework ${BLAS_LIBRARIES})
