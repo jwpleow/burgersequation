@@ -28,7 +28,7 @@ Burgers::~Burgers() {
  * Set the velocity field
  * @param pVal number of something
  */
-void Burgers::SetVelField(Model& A) {
+void Burgers::SetVelField(Model &A) {
 
     double r; ///< Initialise r value
 
@@ -36,8 +36,8 @@ void Burgers::SetVelField(Model& A) {
         for (int j = 0; j < A.Ny; ++j) { ///< j is the row index
             r = sqrt((A.x0 + i * A.dx) * (A.x0 + i * A.dx) + (A.y0 + j * A.dy) * (A.y0 + j * A.dy));
             if (r <= 1.0) {
-                udata_[A.Ny * i + j] = 2.0 * pow(1.0-r,4) * (4.0*r + 1);
-                vdata_[A.Ny * i + j] = 2.0 * pow(1.0-r,4) * (4.0*r + 1);
+                udata_[A.Ny * i + j] = 2.0 * pow(1.0 - r, 4) * (4.0 * r + 1);
+                vdata_[A.Ny * i + j] = 2.0 * pow(1.0 - r, 4) * (4.0 * r + 1);
             }
         }
     }
@@ -125,32 +125,31 @@ void Burgers::PrintVelFields(Model &A) {
             vMyFile << '\n';
         }
 
-        std::cout << "Velocity Field printed to VelocityFields.txt.";
+        std::cout << "Velocity Field printed to VelocityFields.txt. \n";
     } else throw std::runtime_error("File could not be opened for writing.");
 
     vMyFile.close();
 }
 
 
-
-
-
-
 double Burgers::EnergyOfVelField(Model &A) {
-    double* usquare;
-    double* vsquare;
-    usquare = new double[A.Nx*A.Ny]();
-    vsquare = new double[A.Nx*A.Ny]();
+    double *usquare;
+    double *vsquare;
+    usquare = new double[A.Nx * A.Ny]();
+    vsquare = new double[A.Nx * A.Ny]();
+    double usq_vsq;
 
-    if (A.Nx*A.Ny > INT_MAX) throw std::overflow_error("Overflow error in EnergyOfVelField");
+    if (A.Nx * A.Ny > INT_MAX) throw std::overflow_error("Overflow error in EnergyOfVelField");
     // Perform the square of the u and v terms
-    F77NAME(dsbmv)('U', A.Nx*A.Ny , 0, 1.0, udata_ , 1, udata_ , 1, 0, usquare, 1);
-    F77NAME(dsbmv)('U', A.Nx*A.Ny , 0, 1.0, vdata_ , 1, vdata_ , 1, 0, vsquare, 1); // check the unsigned long -> signed int conv
+    F77NAME(dsbmv)('U', A.Nx * A.Ny, 0, 1.0, udata_, 1, udata_, 1, 0, usquare, 1);
+    F77NAME(dsbmv)('U', A.Nx * A.Ny, 0, 1.0, vdata_, 1, vdata_, 1, 0, vsquare, 1);
+
+    usq_vsq = F77NAME(dasum)(A.Nx * A.Ny, usquare, 1) + F77NAME(dasum)(A.Nx * A.Ny, vsquare, 1);
 
     delete[] usquare;
     delete[] vsquare;
 
-    return 0.5*(F77NAME(dasum)(A.Nx*A.Ny , usquare , 1) + F77NAME(dasum)(A.Nx*A.Ny , vsquare , 1))*A.dx*A.dy;
+    return 0.5 * (usq_vsq) * A.dx * A.dy;
 }
 
 

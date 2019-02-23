@@ -35,9 +35,9 @@ Model::Model(int argc, char *argv[]) {
     if (std::stoi(argv[4]) <= 0 || std::stoi(argv[5]) <= 0 || std::stoi(argv[6]) <= 0) {
         throw std::invalid_argument("Number of timesteps/grid points must be greater than 0!");
     }
-    Nx = std::stoul(argv[4]);
-    Ny = std::stoul(argv[5]);
-    Nt = std::stoul(argv[6]);
+    Nx = std::stoi(argv[4]);
+    Ny = std::stoi(argv[5]);
+    Nt = std::stoi(argv[6]);
 
 
     ax = std::stod(argv[7]);

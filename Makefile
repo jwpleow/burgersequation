@@ -9,7 +9,7 @@ default: burg
 all: diff advx advx burg
 
 burgers.o: burgers.cpp
-	g++ -std=c++14 -Wall -O2 -o burgers.o -c burgers.cpp
+	$(CXX) $(CXXFLAGS) -o burgers.o -c burgers.cpp
 
 Burgers.o: Burgers.cpp Burgers.h
 	$(CXX) $(CXXFLAGS) -o Burgers.o -c Burgers.cpp
@@ -31,7 +31,7 @@ advy: compile
 	./myProg 10 10 1 81 101 4000 0 1 0 0
 
 burg: compile
-	./myProg 10 10 1 81 101 4000 1 0.5 1 0.02
+	./myProg 10 10 1 501 501 4000 1 0.5 1 0.02
 
 # Rule to clean the source directory
 .PHONY: clean
