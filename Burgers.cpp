@@ -131,8 +131,9 @@ void Burgers::PrintVelFields(Model &A) {
     vMyFile.close();
 }
 
-
+// Member function that returns the energy of the velocity field
 double Burgers::EnergyOfVelField(Model &A) {
+    // Create new dynamic memory arrays to hold u^2 and v^2
     double *usquare;
     double *vsquare;
     usquare = new double[A.Nx * A.Ny]();
@@ -144,8 +145,10 @@ double Burgers::EnergyOfVelField(Model &A) {
     F77NAME(dsbmv)('U', A.Nx * A.Ny, 0, 1.0, udata_, 1, udata_, 1, 0, usquare, 1);
     F77NAME(dsbmv)('U', A.Nx * A.Ny, 0, 1.0, vdata_, 1, vdata_, 1, 0, vsquare, 1);
 
+    // Store the total sum of the elements of u^2 + v^2
     usq_vsq = F77NAME(dasum)(A.Nx * A.Ny, usquare, 1) + F77NAME(dasum)(A.Nx * A.Ny, vsquare, 1);
 
+    // Free up dynamic memory allocation
     delete[] usquare;
     delete[] vsquare;
 

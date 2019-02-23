@@ -6,47 +6,34 @@
 
 #include "Model.h"
 
-/// Constructor that takes in the required parameters from the standard program argument
+/// Constructor that takes in the required parameters from the argument
 Model::Model(int argc, char *argv[]) {
     /// Check for correct number of arguments
     if (argc != 11) {
         throw std::invalid_argument("Incorrect number of input arguments!");
     }
 
-//    std::string input(argv[1]);
-//
-//    if (std::any_of(input.begin(), input.end(), [](char ch) { return !isdigit(ch); }) {
-//        cout << "invalid input." << endl;
-//        return EXIT_FAILURE;
-//    }
-
     /// Parse argument char array into the relevant variables
     Lx = std::stod(argv[1]);
     Ly = std::stod(argv[2]);
 
+    // Check for negative input
     if (std::stod(argv[3]) <= 0) {
         throw std::invalid_argument("Final Time must be greater than 0!");
     }
     T = std::stod(argv[3]);
 
-
-
-    // Timestep & space discretisation validation and parse - check for -ve input
+    // Timestep & space discretisation validation and parse - check for negative input
     if (std::stoi(argv[4]) <= 0 || std::stoi(argv[5]) <= 0 || std::stoi(argv[6]) <= 0) {
         throw std::invalid_argument("Number of timesteps/grid points must be greater than 0!");
     }
     Nx = std::stoi(argv[4]);
     Ny = std::stoi(argv[5]);
     Nt = std::stoi(argv[6]);
-
-
     ax = std::stod(argv[7]);
     ay = std::stod(argv[8]);
     b = std::stod(argv[9]);
     c = std::stod(argv[10]);
-//    if (Nx <= 0 || Ny <= 0 || Nt <= 0) {
-//        throw std::invalid_argument("Number of timesteps/grid points must be greater than 0!");
-//    }
     dx = Lx / (Nx - 1);
     dy = Ly / (Ny - 1);
     dt = T / (Nt);
@@ -54,8 +41,10 @@ Model::Model(int argc, char *argv[]) {
     y0 = -Ly / 2;
 }
 
-Model::~Model() {} ///< Destructor
+// Destructor
+Model::~Model() {}
 
+// Member function that can reparse parameters
 void Model::ParseParameters(int argc, char *argv[]) {
     /// Check for correct number of arguments
     if (argc != 11) {
@@ -83,12 +72,10 @@ void Model::ParseParameters(int argc, char *argv[]) {
 }
 
 void Model::ValidateParameters(){
-
 }
 
-/**
-* Member function to print all parameters
-*/
+
+// Member function to print all parameters
 void Model::PrintParameters() {
     std::cout << "x0: " << x0 << '\n';
     std::cout << "y0: " << y0 << '\n';
