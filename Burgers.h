@@ -68,14 +68,14 @@ public:
     void PrintVelFields(Model &A);
 
 
-    unsigned long xsize() const { return xsize_; } ///< Return x Size
-    unsigned long ysize() const { return ysize_; } ///< Return y Size
+    int xsize() const { return xsize_; } ///< Return x Size
+    int ysize() const { return ysize_; } ///< Return y Size
     double* udata() const { return udata_; } ///< Returns Pointer to u data
     double* vdata() const { return vdata_; }; ///< Returns Pointer to v data
 private:
 
-    unsigned long xsize_; // long just in case of overflow from large size of matrix required
-    unsigned long ysize_; // long just in case of overflow from large size of matrix required
+    int xsize_; // long just in case of overflow from large size of matrix required
+    int ysize_; // long just in case of overflow from large size of matrix required
     double* udata_;
     double* vdata_;
 

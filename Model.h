@@ -61,9 +61,9 @@ private:
     double Lx; ///< x domain size (-Lx/2 <= x <= Lx/2)
     double Ly; ///< y domain size (-Ly/2 <= x <= Ly/2)
     double T;  ///< final time
-    unsigned long Nx;    ///< number of x direction discretisations / grid points
-    unsigned long Ny;    ///< number of y direction discretisations / grid points
-    unsigned long Nt;    ///< number of timesteps
+    int Nx;    ///< number of x direction discretisations / grid points
+    int Ny;    ///< number of y direction discretisations / grid points
+    int Nt;    ///< number of timesteps
     double dx; ///< x direction discretisation
     double dy; ///< y direction discretisation
     double dt; ///< time discretisation
