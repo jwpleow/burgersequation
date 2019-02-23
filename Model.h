@@ -1,12 +1,13 @@
+/**
+* @class Model
+* @brief Stores the relevant parameters for the Burgers equation
+*/
+
 #ifndef CLASS_MODEL
 #define CLASS_MODEL
 
 //#include "mpi.h"
 
-/**
-* @class Model
-* @brief Stores the relevant parameters for the Burgers equation
-*/
 
 class Model {
 friend class Burgers;
@@ -19,7 +20,7 @@ public:
     // * * * * * * * * * * * * * * MEMBER FUNCTIONS  * * * * * * * * * * * * * //
     void PrintParameters();
 
-    bool IsValid(); ///< think about writing this and calling immediately after initialisation?
+    // bool IsValid(); ///< think about writing this and calling immediately after initialisation?
 
     // bool   IsVerbose() const { return verbose; } ///< tells user what it does (Extra information)
     // bool   IsHelp()    const { return help; } ///< print out available command line options
@@ -66,7 +67,7 @@ private:
     int Nt;    ///< number of timesteps
     double dx; ///< x direction discretisation
     double dy; ///< y direction discretisation
-    double dt; ///< time discretisation
+    double dt; ///< time discretisation / length of time step
 
     // Physics
     double ax; ///< coefficient a_x
@@ -74,7 +75,6 @@ private:
     double b;  ///< coefficient b
     double c;  ///< coefficient c
 
-    // Add any additional parameters here...
 };
 
 

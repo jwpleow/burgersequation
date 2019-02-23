@@ -1,10 +1,11 @@
+/**
+* @class Burgers
+* @brief Stores relevant data and functions for solving the Burgers equation
+*/
+
 #ifndef CLASS_BURGERS
 #define CLASS_BURGERS
 
-/**
-* @class Burgers
-* @brief Stores relevant data for solving the Burgers equation
-*/
 #include "Model.h"
 #include <stdexcept>
 #include <iostream>
@@ -78,7 +79,6 @@ private:
     int ysize_; // long just in case of overflow from large size of matrix required
     double* udata_;
     double* vdata_;
-
 
 };
 
