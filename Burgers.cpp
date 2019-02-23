@@ -142,6 +142,7 @@ double Burgers::EnergyOfVelField(Model &A) {
     usquare = new double[A.Nx*A.Ny]();
     vsquare = new double[A.Nx*A.Ny]();
 
+    if (A.Nx*A.Ny > INT_MAX) throw std::overflow_error("Overflow error in EnergyOfVelField");
     // Perform the square of the u and v terms
     F77NAME(dsbmv)('U', A.Nx*A.Ny , 0, 1.0, udata_ , 1, udata_ , 1, 0, usquare, 1);
     F77NAME(dsbmv)('U', A.Nx*A.Ny , 0, 1.0, vdata_ , 1, vdata_ , 1, 0, vsquare, 1); // check the unsigned long -> signed int conv

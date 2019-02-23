@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/jwl16/Desktop/hpc-exercises/Coursework/Burgers.cpp
+Burgers.h
+/home/jwl16/Desktop/hpc-exercises/Coursework/Burgers.h
+
+/home/jwl16/Desktop/hpc-exercises/Coursework/Burgers.h
+Model.h
+/home/jwl16/Desktop/hpc-exercises/Coursework/Model.h
+stdexcept
+-
+iostream
+-
+cmath
+-
+iomanip
+-
+fstream
+-
+climits
+-
+
+/home/jwl16/Desktop/hpc-exercises/Coursework/Model.h
+

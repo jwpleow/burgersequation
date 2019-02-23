@@ -11,6 +11,7 @@
 #include <cmath>
 #include <iomanip>
 #include <fstream>
+#include <climits>
 
 #define F77NAME(x) x##_
 extern "C" {
