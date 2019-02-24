@@ -6,6 +6,7 @@
 #ifndef CLASS_BURGERS
 #define CLASS_BURGERS
 
+#include "mpi.h"
 #include "Model.h"
 #include <stdexcept>
 #include <iostream>
@@ -13,6 +14,7 @@
 #include <iomanip>
 #include <fstream>
 #include <climits>
+
 
 #define F77NAME(x) x##_
 extern "C" {
