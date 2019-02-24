@@ -27,7 +27,6 @@ int main(int argc, char* argv[]) {
 
 
     // Check the time taken for calculation
-    std::cout << "Time integrating velocity field...\n";
     typedef std::chrono::high_resolution_clock hrc;
     typedef std::chrono::milliseconds ms;
     hrc::time_point start = hrc::now();
