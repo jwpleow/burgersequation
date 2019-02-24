@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -std=c++14 -Wall -O2
+CXXFLAGS = -std=c++14 -Wall -O3
 HDRS = Model.h Burgers.h
 OBJS = burgers.o Burgers.o Model.o
 LDLIBS = -lblas
@@ -22,16 +22,16 @@ compile: burgers.o Burgers.o Model.o
 
 # Test cases: Arguments are given in the order: Lx Ly T Nx Ny Nt ax ay b c
 diff: compile
-	./myProg 10 10 1 81 101 4000 0 0 0 1
+	./myProg 10 10 1 2001 2001 4000 0 0 0 1
 
 advx: compile
-	./myProg 10 10 1 81 101 4000 1 0 0 0
+	./myProg 10 10 1 2001 2001 4000 1 0 0 0
 
 advy: compile
-	./myProg 10 10 1 81 101 4000 0 1 0 0
+	./myProg 10 10 1 2001 2001 4000 0 1 0 0
 
 burg: compile
-	./myProg 10 10 1 501 501 4000 1 0.5 1 0.02
+	./myProg 10 10 1 2001 2001 4000 1 0.5 1 0.02
 
 # Rule to clean the source directory
 .PHONY: clean

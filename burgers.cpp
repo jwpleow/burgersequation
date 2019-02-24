@@ -45,6 +45,7 @@ int main(int argc, char* argv[]) {
     // Print the final velocity field to VelocityFields.txt
     b.PrintVelFields(m);
 
+
     return 0;
 }
 
