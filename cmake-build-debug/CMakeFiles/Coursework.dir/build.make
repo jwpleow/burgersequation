@@ -110,6 +110,8 @@ Coursework: CMakeFiles/Coursework.dir/Model.cpp.o
 Coursework: CMakeFiles/Coursework.dir/Burgers.cpp.o
 Coursework: CMakeFiles/Coursework.dir/build.make
 Coursework: /usr/lib/libblas.so
+Coursework: /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so
+Coursework: /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so
 Coursework: CMakeFiles/Coursework.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/jwl16/Desktop/hpc-exercises/Coursework/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable Coursework"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/Coursework.dir/link.txt --verbose=$(VERBOSE)

@@ -6,7 +6,7 @@
 #ifndef CLASS_MODEL
 #define CLASS_MODEL
 
-//#include "mpi.h"
+#include "mpi.h"
 
 
 class Model {
