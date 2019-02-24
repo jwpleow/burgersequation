@@ -1,14 +1,10 @@
-//
 // Created by jwl16 on 18/02/19.
-//
 
 #include "Burgers.h"
-//burger in chinese is called han bao. Macdonalds in chinese is called mai dang lao. xie xie ni. zai jian.
 
 // Constructor for Burgers that accepts an argument of class Model
 Burgers::Burgers(Model &A) {
 
-    // size of matrix required would be gridpoints * (timesteps+1)
     xsize_ = A.Nx;
     ysize_ = A.Ny;
 
@@ -68,16 +64,17 @@ void Burgers::DisplayvVelField(Model &A) {
     }
 }
 
+// Member function that integrates the velocity fields for the parameters specified in Model &A and with initial conditions from SetVelField
 void Burgers::TimeIntegrateVelField(Model &A) {
 
     // Initialise placeholder values required for the Forward Euler Explicit Method
     double u_n;
 
-    for (int t = 0; t < A.Nt; ++t) {
-        for (int i = 1; i < A.Nx - 1; ++i) {
-            for (int j = 1; j < A.Ny - 1; ++j) {
+    for (int t = 0; t < A.Nt; ++t) { ///< iterate over the timesteps
+        for (int i = 1; i < A.Nx - 1; ++i) { ///< i is the column tracker
+            for (int j = 1; j < A.Ny - 1; ++j) { ///< j is the row tracker
 
-                u_n = udata_[A.Ny * i + j]; ///< Store the current value for use in determining v
+                u_n = udata_[A.Ny * i + j]; ///< Store the current u value for use in calculating v
 
                 udata_[A.Ny * i + j] += A.dt * (A.c * ((udata_[A.Ny * (i + 1) + j] - 2.0 * udata_[A.Ny * i + j] +
                                                         udata_[A.Ny * (i - 1) + j]) / (A.dx * A.dx) +
@@ -99,14 +96,17 @@ void Burgers::TimeIntegrateVelField(Model &A) {
             }
         }
     }
+
 }
 
 
+// Member function that prints the current velocity fields (in udata_ and vdata_) to the file VelocityFields.txt
 void Burgers::PrintVelFields(Model &A) {
-    //open file
+    // open file
     std::ofstream vMyFile("VelocityFields.txt");
-    if (vMyFile.good()) {
 
+    // check if filestream is OK
+    if (vMyFile.good()) {
         vMyFile << "Current u Velocity Field: \n";   // think about flipping this to correct y axis
 
         for (int i = 0; i < A.Ny; ++i) { ///< i is the row index
@@ -126,33 +126,49 @@ void Burgers::PrintVelFields(Model &A) {
         }
 
         std::cout << "Velocity Field printed to VelocityFields.txt. \n";
-    } else throw std::runtime_error("File could not be opened for writing.");
+    } else std::cout << ("File could not be opened for writing.");
 
     vMyFile.close();
 }
 
 // Member function that returns the energy of the velocity field
 double Burgers::EnergyOfVelField(Model &A) {
-    // Create new dynamic memory arrays to hold u^2 and v^2
-    double *usquare;
-    double *vsquare;
-    usquare = new double[A.Nx * A.Ny]();
-    vsquare = new double[A.Nx * A.Ny]();
-    double usq_vsq;
+//    // Create new dynamic memory arrays to hold u^2 and v^2
+//    double *usquare;
+//    double *vsquare;
+//    usquare = new double[A.Nx * A.Ny]();
+//    vsquare = new double[A.Nx * A.Ny]();
+//    double usq_vsq;
+//
+//    if (A.Nx * A.Ny > INT_MAX) throw std::overflow_error("Overflow error in EnergyOfVelField");
+//    // Perform the square of the u and v terms
+//    F77NAME(dsbmv)('U', A.Nx * A.Ny, 0, 1.0, udata_, 1, udata_, 1, 0, usquare, 1);
+//    F77NAME(dsbmv)('U', A.Nx * A.Ny, 0, 1.0, vdata_, 1, vdata_, 1, 0, vsquare, 1);
+//
+//    // Store the total sum of the elements of u^2 + v^2
+//    usq_vsq = F77NAME(dasum)(A.Nx * A.Ny, usquare, 1) + F77NAME(dasum)(A.Nx * A.Ny, vsquare, 1);
+//
+//    // Free up dynamic memory allocation
+//    delete[] usquare;
+//    delete[] vsquare;
+//
+//    return 0.5 * (usq_vsq) * A.dx * A.dy;
 
-    if (A.Nx * A.Ny > INT_MAX) throw std::overflow_error("Overflow error in EnergyOfVelField");
-    // Perform the square of the u and v terms
-    F77NAME(dsbmv)('U', A.Nx * A.Ny, 0, 1.0, udata_, 1, udata_, 1, 0, usquare, 1);
-    F77NAME(dsbmv)('U', A.Nx * A.Ny, 0, 1.0, vdata_, 1, vdata_, 1, 0, vsquare, 1);
+    double sum_u_elem_sq = 0;
+    double sum_v_elem_sq = 0;
 
-    // Store the total sum of the elements of u^2 + v^2
-    usq_vsq = F77NAME(dasum)(A.Nx * A.Ny, usquare, 1) + F77NAME(dasum)(A.Nx * A.Ny, vsquare, 1);
+    for (int i = 1; i < A.Nx - 1; ++i) {
+        for (int j = 1; j < A.Ny - 1; ++j) {
+            sum_u_elem_sq += udata_[A.Ny * i + j] * udata_[A.Ny * i + j];
+        }
+    }
+    for (int i = 1; i < A.Nx - 1; ++i) {
+        for (int j = 1; j < A.Ny - 1; ++j) {
+            sum_v_elem_sq += vdata_[A.Ny * i + j] * vdata_[A.Ny * i + j];
+        }
+    }
 
-    // Free up dynamic memory allocation
-    delete[] usquare;
-    delete[] vsquare;
-
-    return 0.5 * (usq_vsq) * A.dx * A.dy;
+    return 0.5 * (sum_u_elem_sq + sum_v_elem_sq) * A.dx * A.dy;
 }
 
 

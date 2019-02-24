@@ -1,1 +1,1 @@
-/usr/bin/c++  -g   CMakeFiles/Coursework.dir/burgers.cpp.o CMakeFiles/Coursework.dir/Model.cpp.o CMakeFiles/Coursework.dir/Burgers.cpp.o  -o Coursework /usr/lib/libblas.so 
+/usr/bin/c++  -O3 -g   CMakeFiles/Coursework.dir/burgers.cpp.o CMakeFiles/Coursework.dir/Model.cpp.o CMakeFiles/Coursework.dir/Burgers.cpp.o  -o Coursework /usr/lib/libblas.so 

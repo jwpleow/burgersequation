@@ -1,4 +1,7 @@
 /home/jwl16/Downloads/clion-2018.3.4/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/jwl16/Desktop/hpc-exercises/Coursework
+-- Found MPI_C: /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi.so (found version "3.1") 
+-- Found MPI_CXX: /usr/lib/x86_64-linux-gnu/openmpi/lib/libmpi_cxx.so (found version "3.1") 
+-- Found MPI: TRUE (found version "3.1")  
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/jwl16/Desktop/hpc-exercises/Coursework/cmake-build-debug

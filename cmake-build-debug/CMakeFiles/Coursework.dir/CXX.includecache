@@ -6,6 +6,10 @@
 
 #IncludeRegexTransform: 
 
+/home/jwl16/Desktop/hpc-exercises/Coursework/Burgers.cpp
+Burgers.h
+/home/jwl16/Desktop/hpc-exercises/Coursework/Burgers.h
+
 /home/jwl16/Desktop/hpc-exercises/Coursework/Burgers.h
 Model.h
 /home/jwl16/Desktop/hpc-exercises/Coursework/Model.h
@@ -23,16 +27,4 @@ climits
 -
 
 /home/jwl16/Desktop/hpc-exercises/Coursework/Model.h
-
-/home/jwl16/Desktop/hpc-exercises/Coursework/burgers.cpp
-chrono
--
-string
--
-iostream
--
-Model.h
-/home/jwl16/Desktop/hpc-exercises/Coursework/Model.h
-Burgers.h
-/home/jwl16/Desktop/hpc-exercises/Coursework/Burgers.h
 
