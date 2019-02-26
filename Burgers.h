@@ -18,24 +18,9 @@
 
 #define F77NAME(x) x##_
 extern "C" {
-double F77NAME(dnrm2)(const int& n, const double* x, const int& incx);  // double Euclidean norm
 
-// double absolute sum
-double F77NAME(dasum)(const int& n, const double* x, const int& incx);
-
-//banded matrix vector multiplication (y <- alpha*A*x + beta*y
-void F77NAME(dsbmv)(const char& uplo, ///< specify whether upper or lower triangular
-                   const int& n, ///< order of the matrix
-                   const int& k, ///< number of super diagonals
-                   const double& alpha, ///< scalar alpha
-                   const double *A, ///< Symmetrical banded matrix A
-                   const int& lda, ///< Leading dimension of A
-                   const double *x, ///< Vector to multiply A by
-                   const int& incx,
-                   const double& beta,
-                   double *y,
-                   const int& incy);
-
+// double dot product
+double F77NAME(ddot)(const int& n, const double* dx, const int& incx, const double* dy, const int& incy);
 
 }
 
@@ -68,7 +53,7 @@ public:
     double EnergyOfVelField(Model &A);
 
     // Function to print the velocity fields to a file
-    void PrintVelFields(Model &A);
+    void FilePrintVelFields(Model &A);
 
 
     int xsize() const { return xsize_; } ///< Return x Size
@@ -81,7 +66,10 @@ private:
     int ysize_; // long just in case of overflow from large size of matrix required
     double* udata_;
     double* vdata_;
-
+    double* udata_2;
+    double* vdata_2;
+    double* ucombineddata_;
+    double* vcombineddata_;
 };
 
 

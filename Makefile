@@ -1,8 +1,5 @@
 CXX = mpicxx
 CXXFLAGS = -std=c++14 -Wall -O3
-HDRS = Model.h Burgers.h
-OBJS = burgers.o Burgers.o Model.o
-LDLIBS = -lblas
 
 default: burg
 
@@ -22,20 +19,20 @@ compile: burgers.o Burgers.o Model.o
 
 # Test cases: Arguments are given in the order (after ./myProg): Lx Ly T Nx Ny Nt ax ay b c
 diff: compile
-	mpiexec -np 2 ./myProg 10 10 1 81 101 4000 0 0 0 1
+	mpiexec -np 2 ./myProg 10 10 1 101 201 4000 0 0 0 1
 
 advx: compile
-	mpiexec -np 2 ./myProg 10 10 1 81 101 4000 1 0 0 0
+	mpiexec -np 2 ./myProg 10 10 1 101 201 4000 1 0 0 0
 
 advy: compile
-	mpiexec -np 2 ./myProg 10 10 1 81 101 4000 0 1 0 0
+	mpiexec -np 2 ./myProg 10 10 1 101 201 4000 0 1 0 0
 
 burg: compile
-	mpiexec -np 2 ./myProg 10 10 1 81 101 4000 1 0.5 1 0.02
+	mpiexec -np 2 ./myProg 10 10 1 2001 2001 4000 1 0.5 1 0.02
 
 # Rule to clean the source directory
 .PHONY: clean
-
+	
 clean:
 	-rm -f *.o myProg
 
