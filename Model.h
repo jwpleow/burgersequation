@@ -46,12 +46,14 @@ public:
 
     double GetC() const { return c; }
 
-    // Add any other getters here...
+
+    // MPI handles
+    int retval, world_rank, world_size, retval_rank, retval_size;
 
 private:
     void ParseParameters(int argc, char *argv[]);
 
-    void ValidateParameters();
+    void ValidateParameters(int argc);
 
     //bool verbose;
     //bool help;
@@ -69,11 +71,17 @@ private:
     double dy; ///< y direction discretisation
     double dt; ///< time discretisation / length of time step
 
+
+
+
     // Physics
     double ax; ///< coefficient a_x
     double ay; ///< coefficient a_y
     double b;  ///< coefficient b
     double c;  ///< coefficient c
+
+    // MPI handles
+    int localNx, localNy, localstart;
 
 };
 
