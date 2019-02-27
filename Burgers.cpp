@@ -30,18 +30,19 @@ void Burgers::SetVelField(Model &A) {
 
     double r; ///< Initialise r value
 
-    // Create new placeholder array to store initial velocity data
-    auto* uinitveldata_ = new double[A.Nx * A.Ny]();
-    auto* vinitveldata_ = new double[A.Nx * A.Ny]();
 
-    // Calculate the initial velocity field
+    // Create the array to store initial velocity data (which will be used in TimeIntegrate to store the final combined values)
+    ucombineddata_ = new double[A.Nx * A.Ny]();
+    vcombineddata_ = new double[A.Nx * A.Ny]();
+
+    // Calculate the initial velocity field in rank 0 process
     if (A.world_rank == 0) {
         for (int i = 0; i < A.Nx; ++i) { ///< i is the column index
             for (int j = 0; j < A.Ny; ++j) { ///< j is the row index
                 r = sqrt((A.x0 + i * A.dx) * (A.x0 + i * A.dx) + (A.y0 + j * A.dy) * (A.y0 + j * A.dy));
                 if (r <= 1.0) {
-                    uinitveldata_[A.Ny * i + j] = 2.0 * pow(1.0 - r, 4) * (4.0 * r + 1);
-                    vinitveldata_[A.Ny * i + j] = 2.0 * pow(1.0 - r, 4) * (4.0 * r + 1);
+                    ucombineddata_[A.Ny * i + j] = 2.0 * pow(1.0 - r, 4) * (4.0 * r + 1);
+                    vcombineddata_[A.Ny * i + j] = 2.0 * pow(1.0 - r, 4) * (4.0 * r + 1);
                 }
             }
         }
@@ -61,22 +62,23 @@ void Burgers::SetVelField(Model &A) {
 
 
     // broadcast the initial velocity data
-    MPI_Bcast(uinitveldata_, A.Nx * A.Ny , MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    MPI_Bcast(vinitveldata_, A.Nx * A.Ny , MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Bcast(ucombineddata_, A.Nx * A.Ny , MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Bcast(vcombineddata_, A.Nx * A.Ny , MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
     // Split the initialised velocity data
     for (int i = 0; i < A.localNx; ++i){
         for (int j = 0; j < A.localNy; ++j){
-            udata_[ i * A.localNy + j] = uinitveldata_[A.localstart + i * A.localNy + j];
-            vdata_[ i * A.localNy + j] = vinitveldata_[A.localstart + i * A.localNy + j];
+            udata_[ i * A.localNy + j] = ucombineddata_[A.localstart + i * A.localNy + j];
+            vdata_[ i * A.localNy + j] = vcombineddata_[A.localstart + i * A.localNy + j];
         }
     }
 
+    // Free the unnecessary dynamic arrays on other processes
+    if (A.world_rank != 0){
+        delete[] ucombineddata_;
+        delete[] vcombineddata_;
+    }
 
-
-    // Delete the unneeded initial velocity arrays
-    delete[] uinitveldata_;
-    delete[] vinitveldata_;
 }
 
 void Burgers::DisplayuVelField(Model &A) {
@@ -98,6 +100,18 @@ void Burgers::DisplayvVelField(Model &A) {
     for (int i = 0; i < A.localNy; ++i) { ///< i is the row index
         for (int j = 0; j < A.localNx; ++j) { ///< j is the column index
             std::cout << std::fixed << std::setprecision(2) << vdata_[A.localNy * j + i] << ' ';
+        }
+        std::cout << '\n';
+    }
+}
+
+void Burgers::DisplayCombinedufield(Model &A) {
+
+    std::cout << "Current u Velocity Field: \n";
+
+    for (int i = 0; i < A.Ny; ++i) { ///< i is the row index
+        for (int j = 0; j < A.Nx; ++j) { ///< j is the column index
+            std::cout << std::fixed << std::setprecision(2) << ucombineddata_[A.Ny * j + i] << ' ';
         }
         std::cout << '\n';
     }
@@ -130,41 +144,43 @@ void Burgers::TimeIntegrateVelField(Model &A) {
                 // Alternate between using data in udata_/vdata_ and udata_2/vdata_2
                 switch (t % 2) {
                     case 0 :
-                        udata_2[A.localNy * i + j] = const3 * udata_[A.localNy * i + (j - 1)] + const1 * udata_[A.localNy * i + j] +
-                                                cdt_dysq * udata_[A.localNy * i + (j + 1)] +
-                                                bdt_dx * (udata_[A.localNy * (i - 1) + j] - udata_[A.localNy * i + j]) *
-                                                udata_[A.localNy * i + j] +
-                                                bdt_dy * (udata_[A.localNy * i + (j - 1)] - udata_[A.localNy * i + j]) *
-                                                vdata_[A.localNy * i + j] + const2 * udata_[A.localNy * (i - 1) + j] +
-                                                cdt_dxsq * udata_[A.localNy * (i + 1) + j];
+                        udata_2[A.localNy * i + j] =
+                                (const3 + bdt_dx * vdata_[A.localNy * i + j]) * udata_[A.localNy * i + (j - 1)] +
+                                (const1 - bdt_dy * vdata_[A.localNy * i + j] +
+                                 bdt_dx * (udata_[A.localNy * (i - 1) + j] - udata_[A.localNy * i + j])) *
+                                udata_[A.localNy * i + j] + cdt_dysq * udata_[A.localNy * i + (j + 1)] +
+                                const2 * udata_[A.localNy * (i - 1) + j] + cdt_dxsq * udata_[A.localNy * (i + 1) + j];
 
-                        vdata_2[A.localNy * i + j] = const3 * vdata_[A.localNy * i + (j - 1)] + const1 * vdata_[A.localNy * i + j] +
-                                                cdt_dysq * vdata_[A.localNy * i + (j + 1)] +
-                                                bdt_dx * (vdata_[A.localNy * (i - 1) + j] - vdata_[A.localNy * i + j]) *
-                                                udata_[A.localNy * i + j] +
-                                                bdt_dy * (vdata_[A.localNy * i + (j - 1)] - vdata_[A.localNy * i + j]) *
-                                                vdata_[A.localNy * i + j] + const2 * vdata_[A.localNy * (i - 1) + j] +
-                                                cdt_dxsq * vdata_[A.localNy * (i + 1) + j];
-
-
+                        vdata_2[A.localNy * i + j] =
+                                const3 * vdata_[A.localNy * i + (j - 1)] + (const1 - bdt_dx * udata_[A.localNy * i + j]
+                                                                            + bdt_dy *
+                                                                              (vdata_[A.localNy * i + (j - 1)] -
+                                                                               vdata_[A.localNy * i + j])) *
+                                                                           vdata_[A.localNy * i + j] +
+                                cdt_dysq * vdata_[A.localNy * i + (j + 1)] +
+                                (const2 + bdt_dx * udata_[A.localNy * i + j]) * vdata_[A.localNy * (i - 1) + j] +
+                                cdt_dxsq * vdata_[A.localNy * (i + 1) + j];
 
                         break;
                     case 1 :
-                        udata_[A.localNy * i + j] = const3 * udata_2[A.localNy * i + (j - 1)] + const1 * udata_2[A.localNy * i + j] +
-                                               cdt_dysq * udata_2[A.localNy * i + (j + 1)] +
-                                               bdt_dx * (udata_2[A.localNy * (i - 1) + j] - udata_2[A.localNy * i + j]) *
-                                               udata_2[A.localNy * i + j] +
-                                               bdt_dy * (udata_2[A.localNy * i + (j - 1)] - udata_2[A.localNy * i + j]) *
-                                               vdata_2[A.localNy * i + j] + const2 * udata_2[A.localNy * (i - 1) + j] +
-                                               cdt_dxsq * udata_2[A.localNy * (i + 1) + j];
+                        udata_[A.localNy * i + j] =
+                                (const3 + bdt_dx * vdata_2[A.localNy * i + j]) * udata_2[A.localNy * i + (j - 1)] +
+                                (const1 - bdt_dy * vdata_2[A.localNy * i + j]
+                                 + bdt_dx * (udata_2[A.localNy * (i - 1) + j] - udata_2[A.localNy * i + j])) *
+                                udata_2[A.localNy * i + j] +
+                                cdt_dysq * udata_2[A.localNy * i + (j + 1)] +
+                                const2 * udata_2[A.localNy * (i - 1) + j] +
+                                cdt_dxsq * udata_2[A.localNy * (i + 1) + j];
 
-                        vdata_[A.localNy * i + j] = const3 * vdata_2[A.localNy * i + (j - 1)] + const1 * vdata_2[A.localNy * i + j] +
-                                               cdt_dysq * vdata_2[A.localNy * i + (j + 1)] +
-                                               bdt_dx * (vdata_2[A.localNy * (i - 1) + j] - vdata_2[A.localNy * i + j]) *
-                                               udata_2[A.localNy * i + j] +
-                                               bdt_dy * (vdata_2[A.localNy * i + (j - 1)] - vdata_2[A.localNy * i + j]) *
-                                               vdata_2[A.localNy * i + j] + const2 * vdata_2[A.localNy * (i - 1) + j] +
-                                               cdt_dxsq * vdata_2[A.localNy * (i + 1) + j];
+                        vdata_[A.localNy * i + j] = const3 * vdata_2[A.localNy * i + (j - 1)] +
+                                                    (const1 - bdt_dx * udata_2[A.localNy * i + j]
+                                                     + bdt_dy * (vdata_2[A.localNy * i + (j - 1)] -
+                                                                 vdata_2[A.localNy * i + j])) *
+                                                    vdata_2[A.localNy * i + j] +
+                                                    cdt_dysq * vdata_2[A.localNy * i + (j + 1)] +
+                                                    (const2 + bdt_dx * udata_2[A.localNy * i + j]) *
+                                                    vdata_2[A.localNy * (i - 1) + j] +
+                                                    cdt_dxsq * vdata_2[A.localNy * (i + 1) + j];
 
                         break;
                     default :
@@ -225,8 +241,27 @@ void Burgers::TimeIntegrateVelField(Model &A) {
         delete[] vdata_2;
     }
 
+    if (A.world_rank == 0) {
+
+        for (int i = 0; i < A.localNx; ++i) {
+            for (int j = 0; j < A.localNy; ++j) {
+                ucombineddata_[i * A.localNy + j] = udata_[A.localNy * i + j];
+                vcombineddata_[i * A.localNy + j] = vdata_[A.localNy * i + j];
+            }
+        }
+        std::cout << "MPIcheck\n";
 
 
+        MPI_Recv(&ucombineddata_[((A.Nx / 2) + 1) * A.Ny], A.Ny * (A.localNx - 2 + A.Nx % 2), MPI_DOUBLE, 1, 4,
+                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Recv(&vcombineddata_[((A.Nx / 2) + 1) * A.Ny], A.Ny * (A.localNx - 2 + A.Nx % 2), MPI_DOUBLE, 1, 5,
+                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+
+    } else {
+        MPI_Send(&udata_[A.localNy * 2], A.Ny * (A.localNx - 2), MPI_DOUBLE, 0, 4, MPI_COMM_WORLD);
+        MPI_Send(&vdata_[A.localNy * 2], A.Ny * (A.localNx - 2), MPI_DOUBLE, 0, 5, MPI_COMM_WORLD);
+    }
 
 }
 
@@ -265,7 +300,7 @@ void Burgers::FilePrintVelFields(Model &A) {
 // Member function that returns the energy of the velocity field
 double Burgers::EnergyOfVelField(Model &A) {
 
-    return 0.5 * (F77NAME(ddot)(A.Nx * A.Ny, udata_, 1, udata_, 1) + F77NAME(ddot)(A.Nx * A.Ny, vdata_, 1, vdata_, 1)) * A.dx * A.dy;
+    return 0.5 * (F77NAME(ddot)(A.Nx * A.Ny, ucombineddata_, 1, ucombineddata_, 1) + F77NAME(ddot)(A.Nx * A.Ny, vcombineddata_, 1, vcombineddata_, 1)) * A.dx * A.dy;
 
 }
 

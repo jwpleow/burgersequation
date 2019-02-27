@@ -47,6 +47,7 @@ public:
     void DisplayuVelField(Model &A);
     void DisplayvVelField(Model &A);
 
+    void DisplayCombinedufield(Model &A);
 
     void TimeIntegrateVelField(Model &A);
 

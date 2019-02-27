@@ -40,20 +40,31 @@ int main(int argc, char* argv[]) {
     hrc::time_point end = hrc::now();
     std::cout << "Time taken: " << std::chrono::duration_cast<ms>(end - start).count() << "ms\n";
 
+
+//    // velocity field printers
 //    if (m.world_rank == 0) {
 //        std::cout << m.world_rank << " vel field: \n";
 //        b.DisplayuVelField(m);
 //
 //    }
 //    if (m.world_rank == 1) {
-//        std::chrono::seconds dura(3);
+//        std::chrono::seconds dura(2);
 //        std::this_thread::sleep_for(dura);
 //        std::cout << m.world_rank << " vel field: \n";
 //        b.DisplayuVelField(m);
 //    }
+//
+//    if (m.world_rank == 0) {
+//        std::chrono::seconds dura(4);
+//        std::this_thread::sleep_for(dura);
+//        std::cout << m.world_rank << " vel field: \n";
+//        b.DisplayCombinedufield(m);
+//
+//    }
+
 
     // Calculate final energy
-//    std::cout << "Energy of velocity field: " << std::setprecision(5) << b.EnergyOfVelField(m) << std::endl;
+    if (m.world_rank == 0)  std::cout << "Energy of velocity field: " << std::setprecision(5) << b.EnergyOfVelField(m) << std::endl;
 
     // Print the final velocity field to VelocityFields.txt
 //    b.FilePrintVelFields(m);
