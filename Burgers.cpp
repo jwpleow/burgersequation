@@ -277,7 +277,7 @@ void Burgers::FilePrintVelFields(Model &A) {
 
         for (int i = 0; i < A.Ny; ++i) { ///< i is the row index
             for (int j = 0; j < A.Nx; ++j) { ///< j is the column index
-                vMyFile << std::fixed << std::setprecision(4) << std::scientific << udata_[A.Ny * j + i] << ' ';
+                vMyFile << std::fixed << std::setprecision(4) << std::scientific << ucombineddata_[A.Ny * j + i] << ' ';
             }
             vMyFile << '\n';
         }
@@ -286,7 +286,7 @@ void Burgers::FilePrintVelFields(Model &A) {
 
         for (int i = 0; i < A.Ny; ++i) { ///< i is the row index
             for (int j = 0; j < A.Nx; ++j) { ///< j is the column index
-                vMyFile << std::fixed << std::setprecision(4) << std::scientific << vdata_[A.Ny * j + i] << ' ';
+                vMyFile << std::fixed << std::setprecision(4) << std::scientific << vcombineddata_[A.Ny * j + i] << ' ';
             }
             vMyFile << '\n';
         }

@@ -28,7 +28,7 @@ advy: compile
 	mpiexec -np 2 ./myProg 10 10 1 101 201 4000 0 1 0 0
 
 burg: compile
-	mpiexec -np 2 ./myProg 10 10 1 501 501 4000 1 0.5 1 0.02
+	mpiexec -np 2 ./myProg 10 10 1 32 52 4000 1 0.5 1 0.02
 
 # Rule to clean the source directory
 .PHONY: clean
