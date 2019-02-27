@@ -119,9 +119,9 @@ void Burgers::DisplayCombinedufield(Model &A) {
 
 // Member function that integrates the velocity fields for the parameters specified in Model &A and with initial conditions from SetVelField
 void Burgers::TimeIntegrateVelField(Model &A) {
-
-//    MPI_Status status;
-//    MPI_Request request;
+//
+//    MPI_Status status[4];
+//    MPI_Request request[4];
 
     // Precalculate constants for use in the multiplication
     double cdt_dxsq, cdt_dysq, axdt_dx, aydt_dy, bdt_dx, bdt_dy, const1, const2, const3;
@@ -159,24 +159,36 @@ void Burgers::TimeIntegrateVelField(Model &A) {
                                 (const2 + bdt_dx * udata_[A.localNy * i + j]) * vdata_[A.localNy * (i - 1) + j] +
                                 cdt_dxsq * vdata_[A.localNy * (i + 1) + j];
 
-
                     }
                 }
 
                 if (A.world_rank == 0) {
-                    MPI_Isend(&udata_2[(A.Nx / 2 - 1) * A.localNy], A.localNy, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
-                    MPI_Irecv(&udata_2[(A.Nx / 2) * A.localNy], A.localNy, MPI_DOUBLE, 1, 1, MPI_COMM_WORLD,
+//                    MPI_Isend(&udata_2[(A.Nx / 2 - 1) * A.localNy], A.localNy, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &request[0]);
+//                    MPI_Irecv(&udata_2[(A.Nx / 2) * A.localNy], A.localNy, MPI_DOUBLE, 1, 1, MPI_COMM_WORLD,
+//                              &request[1]);
+//
+//                    MPI_Isend(&vdata_2[(A.Nx / 2 - 1) * A.localNy], A.localNy, MPI_DOUBLE, 1, 2, MPI_COMM_WORLD, &request[2]);
+//                    MPI_Irecv(&vdata_2[(A.Nx / 2) * A.localNy], A.localNy, MPI_DOUBLE, 1, 3, MPI_COMM_WORLD, &request[3]);
+//                    MPI_Waitall(4,request, status);
+                    MPI_Send(&udata_2[(A.Nx / 2 - 1) * A.localNy], A.localNy, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
+                    MPI_Recv(&udata_2[(A.Nx / 2) * A.localNy], A.localNy, MPI_DOUBLE, 1, 1, MPI_COMM_WORLD,
                              MPI_STATUS_IGNORE);
-                    MPI_Isend(&vdata_2[(A.Nx / 2 - 1) * A.localNy], A.localNy, MPI_DOUBLE, 1, 2, MPI_COMM_WORLD);
-                    MPI_Irecv(&vdata_2[(A.Nx / 2) * A.localNy], A.localNy, MPI_DOUBLE, 1, 3, MPI_COMM_WORLD,
+                    MPI_Send(&vdata_2[(A.Nx / 2 - 1) * A.localNy], A.localNy, MPI_DOUBLE, 1, 2, MPI_COMM_WORLD);
+                    MPI_Recv(&vdata_2[(A.Nx / 2) * A.localNy], A.localNy, MPI_DOUBLE, 1, 3, MPI_COMM_WORLD,
                              MPI_STATUS_IGNORE);
+
                 } else {
-                    MPI_Irecv(&udata_2[0], A.localNy, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    MPI_Isend(&udata_2[A.localNy], A.localNy, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
-                    MPI_Irecv(&vdata_2[0], A.localNy, MPI_DOUBLE, 0, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    MPI_Isend(&vdata_2[A.localNy], A.localNy, MPI_DOUBLE, 0, 3, MPI_COMM_WORLD);
+//                    MPI_Irecv(&udata_2[0], A.localNy, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &request[0]);
+//                    MPI_Isend(&udata_2[A.localNy], A.localNy, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD, &request[1]);
+//                    MPI_Irecv(&vdata_2[0], A.localNy, MPI_DOUBLE, 0, 2, MPI_COMM_WORLD,&request[2]);
+//                    MPI_Isend(&vdata_2[A.localNy], A.localNy, MPI_DOUBLE, 0, 3, MPI_COMM_WORLD, &request[3]);
+//                    MPI_Waitall(4,request, status);
+                    MPI_Recv(&udata_2[0], A.localNy, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    MPI_Send(&udata_2[A.localNy], A.localNy, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
+                    MPI_Recv(&vdata_2[0], A.localNy, MPI_DOUBLE, 0, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    MPI_Send(&vdata_2[A.localNy], A.localNy, MPI_DOUBLE, 0, 3, MPI_COMM_WORLD);
                 }
-                    //MPI_Wait();
+
                 break;
             case 1 :
                 for (int i = 1; i < A.localNx - 1; ++i) { ///< i is the column tracker
@@ -210,7 +222,7 @@ void Burgers::TimeIntegrateVelField(Model &A) {
                     MPI_Send(&vdata_[(A.Nx / 2 - 1) * A.localNy], A.localNy, MPI_DOUBLE, 1, 2, MPI_COMM_WORLD);
                     MPI_Recv(&vdata_[(A.Nx / 2) * A.localNy], A.localNy, MPI_DOUBLE, 1, 3, MPI_COMM_WORLD,
                              MPI_STATUS_IGNORE);
-                    //MPI_Wait();
+
                 } else {
                     MPI_Recv(&udata_[0], A.localNy, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                     MPI_Send(&udata_[A.localNy], A.localNy, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);

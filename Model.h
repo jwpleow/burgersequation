@@ -48,7 +48,7 @@ public:
 
 
     // MPI handles
-    int retval, world_rank, world_size, retval_rank, retval_size;
+    int retval, retval_rank, world_rank, world_size,  retval_size, nPx, nPy;
 
 private:
     void ParseParameters(int argc, char *argv[]);
@@ -82,6 +82,7 @@ private:
 
     // MPI handles
     int localNx, localNy, localstart;
+
 
 };
 

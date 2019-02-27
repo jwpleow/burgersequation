@@ -7,7 +7,7 @@
 * Parameters of the problem can be edited in the Makefile
 *
 * For different initial conditions, edit Burgers::SetVelField in Burgers.cpp
-*
+* Arrays are stored in column-major format
 *  Written by Joel Leow - 23/02/2019
 */
 #include <chrono>
