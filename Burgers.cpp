@@ -137,13 +137,11 @@ void Burgers::TimeIntegrateVelField(Model &A) {
     const3 = (cdt_dysq + aydt_dy);
 
     for (int t = 0; t < A.Nt; ++t) { ///< iterate over the timesteps
-        for (int i = 1; i < A.localNx - 1; ++i) { ///< i is the column tracker
-            for (int j = 1; j < A.localNy - 1; ++j) { ///< j is the row tracker
-
-
-                // Alternate between using data in udata_/vdata_ and udata_2/vdata_2
-                switch (t % 2) {
-                    case 0 :
+        // Alternate between using data in udata_/vdata_ and udata_2/vdata_2
+        switch (t % 2) {
+            case 0 :
+                for (int i = 1; i < A.localNx - 1; ++i) { ///< i is the column tracker
+                    for (int j = 1; j < A.localNy - 1; ++j) { ///< j is the row tracker
                         udata_2[A.localNy * i + j] =
                                 (const3 + bdt_dx * vdata_[A.localNy * i + j]) * udata_[A.localNy * i + (j - 1)] +
                                 (const1 - bdt_dy * vdata_[A.localNy * i + j] +
@@ -161,8 +159,28 @@ void Burgers::TimeIntegrateVelField(Model &A) {
                                 (const2 + bdt_dx * udata_[A.localNy * i + j]) * vdata_[A.localNy * (i - 1) + j] +
                                 cdt_dxsq * vdata_[A.localNy * (i + 1) + j];
 
-                        break;
-                    case 1 :
+
+                    }
+                }
+
+                if (A.world_rank == 0) {
+                    MPI_Isend(&udata_2[(A.Nx / 2 - 1) * A.localNy], A.localNy, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
+                    MPI_Irecv(&udata_2[(A.Nx / 2) * A.localNy], A.localNy, MPI_DOUBLE, 1, 1, MPI_COMM_WORLD,
+                             MPI_STATUS_IGNORE);
+                    MPI_Isend(&vdata_2[(A.Nx / 2 - 1) * A.localNy], A.localNy, MPI_DOUBLE, 1, 2, MPI_COMM_WORLD);
+                    MPI_Irecv(&vdata_2[(A.Nx / 2) * A.localNy], A.localNy, MPI_DOUBLE, 1, 3, MPI_COMM_WORLD,
+                             MPI_STATUS_IGNORE);
+                } else {
+                    MPI_Irecv(&udata_2[0], A.localNy, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    MPI_Isend(&udata_2[A.localNy], A.localNy, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
+                    MPI_Irecv(&vdata_2[0], A.localNy, MPI_DOUBLE, 0, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    MPI_Isend(&vdata_2[A.localNy], A.localNy, MPI_DOUBLE, 0, 3, MPI_COMM_WORLD);
+                }
+                    //MPI_Wait();
+                break;
+            case 1 :
+                for (int i = 1; i < A.localNx - 1; ++i) { ///< i is the column tracker
+                    for (int j = 1; j < A.localNy - 1; ++j) { ///< j is the row tracker
                         udata_[A.localNy * i + j] =
                                 (const3 + bdt_dx * vdata_2[A.localNy * i + j]) * udata_2[A.localNy * i + (j - 1)] +
                                 (const1 - bdt_dy * vdata_2[A.localNy * i + j]
@@ -182,32 +200,9 @@ void Burgers::TimeIntegrateVelField(Model &A) {
                                                     vdata_2[A.localNy * (i - 1) + j] +
                                                     cdt_dxsq * vdata_2[A.localNy * (i + 1) + j];
 
-                        break;
-                    default :
-                        std::cout << "Error in switching during time integration";
-                        break;
-                }
-            }
-        }
 
-        switch (t % 2) {
-            case 0 :
-                if (A.world_rank == 0) {
-                    MPI_Send(&udata_2[(A.Nx / 2 - 1) * A.localNy], A.localNy, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
-                    MPI_Recv(&udata_2[(A.Nx / 2) * A.localNy], A.localNy, MPI_DOUBLE, 1, 1, MPI_COMM_WORLD,
-                             MPI_STATUS_IGNORE);
-                    MPI_Send(&vdata_2[(A.Nx / 2 - 1) * A.localNy], A.localNy, MPI_DOUBLE, 1, 2, MPI_COMM_WORLD);
-                    MPI_Recv(&vdata_2[(A.Nx / 2) * A.localNy], A.localNy, MPI_DOUBLE, 1, 3, MPI_COMM_WORLD,
-                             MPI_STATUS_IGNORE);
-                    //MPI_Wait();
-                } else {
-                    MPI_Recv(&udata_2[0], A.localNy, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    MPI_Send(&udata_2[A.localNy], A.localNy, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
-                    MPI_Recv(&vdata_2[0], A.localNy, MPI_DOUBLE, 0, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    MPI_Send(&vdata_2[A.localNy], A.localNy, MPI_DOUBLE, 0, 3, MPI_COMM_WORLD);
+                    }
                 }
-                break;
-            case 1 :
                 if (A.world_rank == 0) {
                     MPI_Send(&udata_[(A.Nx / 2 - 1) * A.localNy], A.localNy, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
                     MPI_Recv(&udata_[(A.Nx / 2) * A.localNy], A.localNy, MPI_DOUBLE, 1, 1, MPI_COMM_WORLD,
@@ -222,9 +217,11 @@ void Burgers::TimeIntegrateVelField(Model &A) {
                     MPI_Recv(&vdata_[0], A.localNy, MPI_DOUBLE, 0, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
                     MPI_Send(&vdata_[A.localNy], A.localNy, MPI_DOUBLE, 0, 3, MPI_COMM_WORLD);
                 }
+
                 break;
+
             default :
-                std::cout << "Error in switching during time integration - MPI communication";
+                std::cout << "Error in switching during time integration";
                 break;
         }
 
