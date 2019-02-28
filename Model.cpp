@@ -21,8 +21,6 @@ Model::Model(int argc, char *argv[]) {
     }
 
 
-    // Check ranks are properly allocated
-    std::cout << "My rank is: " << world_rank << '\n';
 
     ParseParameters(argc, argv);
     ValidateParameters(argc);
@@ -33,18 +31,25 @@ Model::Model(int argc, char *argv[]) {
 
 
     // allocate the last columns of processes to have the extra+1 in localNx (LHS of if is column no., RHS is the columns that will not need to be assigned the extra+1 localNx)
-    if ( world_rank / nPy > nPx - 1 - (Nx - 2) % nPx) {
+    // and  find the starting position of the processor grid localNx/Ny array in the global Nx*Ny array
+    if (world_rank / nPy > nPx - 1 - ((Nx - 2) % nPx)) {
         localNx = (Nx - 2) / nPx + 2 + 1;
+        localstart = (((Nx - 2) / nPx) * (world_rank / nPy) + ((world_rank / nPy) - (nPx - (Nx - 2) % nPx))) * Ny;
     } else {
         localNx = (Nx - 2) / nPx + 2;
+        localstart = (((Nx - 2) / nPx) * (world_rank / nPy)) * Ny;
     }
     // allocate the last rows of the processes to have the extra+1 in localNy (LHS of if is row no., RHS is the rows that will not need to be assigned the extra+1 localNx)
-    if ( world_rank % nPy > nPy - 1 - (Ny - 2) % nPy) {
+    if (world_rank % nPy > nPy - 1 - ((Ny - 2) % nPy)) {
         localNy = (Ny - 2) / nPy + 2 + 1;
+        localstart += ((Ny - 2) / nPy) * (world_rank % nPy) + ((world_rank % nPy) - (nPy - (Ny - 2) % nPy));
     } else {
         localNy = (Ny - 2) / nPy + 2;
+        localstart += ((Ny - 2) / nPy) * (world_rank % nPy);
     }
 
+
+    std::cout<< "My rank is: " <<  world_rank << " localNy: " << localNy << " localNx: " << localNx << " localstart: "<< localstart << std::endl;
 
 //    } else { ///< for other processes
 //

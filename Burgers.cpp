@@ -68,8 +68,8 @@ void Burgers::SetVelField(Model &A) {
     // Split the initialised velocity data
     for (int i = 0; i < A.localNx; ++i){
         for (int j = 0; j < A.localNy; ++j){
-            udata_[ i * A.localNy + j] = ucombineddata_[A.localstart + i * A.localNy + j];
-            vdata_[ i * A.localNy + j] = vcombineddata_[A.localstart + i * A.localNy + j];
+            udata_[ i * A.localNy + j] = ucombineddata_[A.localstart + i * A.Ny + j];
+            vdata_[ i * A.localNy + j] = vcombineddata_[A.localstart + i * A.Ny + j];
         }
     }
 
@@ -259,8 +259,6 @@ void Burgers::TimeIntegrateVelField(Model &A) {
             }
         }
         std::cout << "MPIcheck\n";
-
-
         MPI_Recv(&ucombineddata_[((A.Nx / 2) + 1) * A.Ny], A.Ny * (A.localNx - 2 + A.Nx % 2), MPI_DOUBLE, 1, 4,
                  MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         MPI_Recv(&vcombineddata_[((A.Nx / 2) + 1) * A.Ny], A.Ny * (A.localNx - 2 + A.Nx % 2), MPI_DOUBLE, 1, 5,

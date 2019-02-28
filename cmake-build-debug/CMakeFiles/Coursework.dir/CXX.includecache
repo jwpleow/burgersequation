@@ -37,6 +37,8 @@ Model.h
 /home/jwl16/Desktop/hpc-exercises/Coursework/Model.h
 Burgers.h
 /home/jwl16/Desktop/hpc-exercises/Coursework/Burgers.h
+thread
+-
 
 /usr/lib/x86_64-linux-gnu/openmpi/include/mpi.h
 stddef.h
