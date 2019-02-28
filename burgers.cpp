@@ -27,18 +27,18 @@ int main(int argc, char* argv[]) {
     b.SetVelField(m); ///< Calculate the initial velocity field from initial conditions
 
 
-    if (m.world_rank == 0) std::cout << "Time integrating velocity field...\n";
-    // Check the time taken for calculation
-    typedef std::chrono::high_resolution_clock hrc;
-    typedef std::chrono::milliseconds ms;
-    hrc::time_point start = hrc::now();
+//    if (m.world_rank == 0) std::cout << "Time integrating velocity field...\n";
+//    // Check the time taken for calculation
+//    typedef std::chrono::high_resolution_clock hrc;
+//    typedef std::chrono::milliseconds ms;
+//    hrc::time_point start = hrc::now();
 
 //     Time integrate the velocity field
-    b.TimeIntegrateVelField(m);
+//    b.TimeIntegrateVelField(m);
 
-    // Print time taken to time integrate the field
-    hrc::time_point end = hrc::now();
-    std::cout << "Time taken: " << std::chrono::duration_cast<ms>(end - start).count() << "ms\n";
+//    // Print time taken to time integrate the field
+//    hrc::time_point end = hrc::now();
+//    std::cout << "Time taken: " << std::chrono::duration_cast<ms>(end - start).count() << "ms\n";
 
 
 //    // velocity field printers
@@ -63,8 +63,8 @@ int main(int argc, char* argv[]) {
 //    }
 
 
-    // Calculate final energy
-    if (m.world_rank == 0)  std::cout << "Energy of velocity field: " << std::setprecision(5) << b.EnergyOfVelField(m) << std::endl;
+//    // Calculate final energy
+//    if (m.world_rank == 0)  std::cout << "Energy of velocity field: " << std::setprecision(5) << b.EnergyOfVelField(m) << std::endl;
 
     // Print the final velocity field to VelocityFields.txt
 //    b.FilePrintVelFields(m);
