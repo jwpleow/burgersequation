@@ -26,11 +26,9 @@ Model::Model(int argc, char *argv[]) {
     ValidateParameters(argc);
 
     // Arrange process ranks in column major format
-    // Find the localNx and Ny sizes, as well as the start location of each array
-
-
-
-    // allocate the last columns of processes to have the extra+1 in localNx (LHS of if is column no., RHS is the columns that will not need to be assigned the extra+1 localNx)
+    // This section finds the localNx and Ny sizes, as well as the start location of each array
+    // allocate the last columns of processes to have the extra+1 in localNx
+    // (LHS of if is column no., RHS is the columns that will not need to be assigned the extra+1 localNx)
     // and  find the starting position of the processor grid localNx/Ny array in the global Nx*Ny array
     if (world_rank / nPy > nPx - 1 - ((Nx - 2) % nPx)) {
         localNx = (Nx - 2) / nPx + 2 + 1;
@@ -51,32 +49,6 @@ Model::Model(int argc, char *argv[]) {
 
     std::cout<< "My rank is: " <<  world_rank << " localNy: " << localNy << " localNx: " << localNx << " localstart: "<< localstart << std::endl;
 
-//    } else { ///< for other processes
-//
-//        if (nPx >  nPx - 1 - (Nx - 2) % nPx) { ///< distribute the extra array lengths needed equally among last few processes
-//            localNx = (Nx - 2) / world_size + 2 + 1;
-//        } else {
-//            localNx = (Nx - 2) / world_size + 2;
-//        }
-
-
-
-
-
-
-
-//    // Check if arrays can be subdivided equally, and assign them their Nx sizes and starting location in the array
-//    if (Nx % 2 == 0) {
-//        localNx = (Nx / 2 + 1);
-//        localstart = world_rank * ((localNx - 2) * localNy);
-//    } else {
-//        if (world_rank == 0) {
-//            localNx = (Nx + 1) / 2;
-//        } else{
-//            localNx = (Nx + 1) / 2 + 1;
-//        }
-//        localstart = world_rank * (((Nx - 1) / world_size - 1) * localNy);
-//    }
 
 }
 

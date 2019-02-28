@@ -12,11 +12,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5e8f15d3-92bb-4168-9f5c-06a6bbc9087b" name="Default Changelist" comment="Building the Model and Burgers Classes v1">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Burgers.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Burgers.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Burgers.o" beforeDir="false" afterPath="$PROJECT_DIR$/Burgers.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Model.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Model.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Model.o" beforeDir="false" afterPath="$PROJECT_DIR$/Model.o" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/burgers.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/burgers.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/burgers.o" beforeDir="false" afterPath="$PROJECT_DIR$/burgers.o" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/myProg" beforeDir="false" afterPath="$PROJECT_DIR$/myProg" afterDir="false" />
@@ -40,11 +39,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/burgers.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="557">
-              <caret line="49" column="30" lean-forward="true" selection-start-line="49" selection-start-column="30" selection-end-line="49" selection-end-column="30" />
+            <state relative-caret-position="-4">
+              <caret line="22" column="31" lean-forward="true" selection-start-line="22" selection-start-column="31" selection-end-line="22" selection-end-column="31" />
               <folding>
                 <element signature="e#371#388#0" expanded="true" />
               </folding>
@@ -61,10 +60,10 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Model.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="456">
+            <state relative-caret-position="684">
               <caret line="50" lean-forward="true" selection-start-line="50" selection-end-line="50" />
               <folding>
                 <element signature="e#34#53#0" expanded="true" />
@@ -88,8 +87,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Burgers.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1216">
-              <caret line="74" lean-forward="true" selection-start-line="74" selection-end-line="74" />
+            <state relative-caret-position="722">
+              <caret line="181" lean-forward="true" selection-start-line="181" selection-end-line="181" />
             </state>
           </provider>
         </entry>
@@ -115,9 +114,9 @@
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/Burgers.h" />
         <option value="$PROJECT_DIR$/Model.h" />
-        <option value="$PROJECT_DIR$/Model.cpp" />
-        <option value="$PROJECT_DIR$/Burgers.cpp" />
         <option value="$PROJECT_DIR$/burgers.cpp" />
+        <option value="$PROJECT_DIR$/Burgers.cpp" />
+        <option value="$PROJECT_DIR$/Model.cpp" />
       </list>
     </option>
   </component>
@@ -190,12 +189,12 @@
       <updated>1550529551046</updated>
       <workItem from="1550529552258" duration="113254000" />
       <workItem from="1551030418842" duration="2710000" />
-      <workItem from="1551104539302" duration="81713000" />
+      <workItem from="1551104539302" duration="83891000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="197677000" />
+    <option name="totallyTimeSpent" value="199855000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -352,16 +351,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Model.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="456">
-          <caret line="50" lean-forward="true" selection-start-line="50" selection-end-line="50" />
-          <folding>
-            <element signature="e#34#53#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Burgers.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1027">
@@ -372,19 +361,29 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Burgers.cpp">
+    <entry file="file://$PROJECT_DIR$/burgers.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1216">
-          <caret line="74" lean-forward="true" selection-start-line="74" selection-end-line="74" />
+        <state relative-caret-position="-4">
+          <caret line="22" column="31" lean-forward="true" selection-start-line="22" selection-start-column="31" selection-end-line="22" selection-end-column="31" />
+          <folding>
+            <element signature="e#371#388#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/burgers.cpp">
+    <entry file="file://$PROJECT_DIR$/Burgers.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="557">
-          <caret line="49" column="30" lean-forward="true" selection-start-line="49" selection-start-column="30" selection-end-line="49" selection-end-column="30" />
+        <state relative-caret-position="722">
+          <caret line="181" lean-forward="true" selection-start-line="181" selection-end-line="181" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="684">
+          <caret line="50" lean-forward="true" selection-start-line="50" selection-end-line="50" />
           <folding>
-            <element signature="e#371#388#0" expanded="true" />
+            <element signature="e#34#53#0" expanded="true" />
           </folding>
         </state>
       </provider>

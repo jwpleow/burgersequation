@@ -162,6 +162,9 @@ void Burgers::TimeIntegrateVelField(Model &A) {
                     }
                 }
 
+
+
+
                 if (A.world_rank == 0) {
 //                    MPI_Isend(&udata_2[(A.Nx / 2 - 1) * A.localNy], A.localNy, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &request[0]);
 //                    MPI_Irecv(&udata_2[(A.Nx / 2) * A.localNy], A.localNy, MPI_DOUBLE, 1, 1, MPI_COMM_WORLD,
