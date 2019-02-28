@@ -163,34 +163,28 @@ void Burgers::TimeIntegrateVelField(Model &A) {
                 }
 
 
-
-
-                if (A.world_rank == 0) {
-//                    MPI_Isend(&udata_2[(A.Nx / 2 - 1) * A.localNy], A.localNy, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD, &request[0]);
-//                    MPI_Irecv(&udata_2[(A.Nx / 2) * A.localNy], A.localNy, MPI_DOUBLE, 1, 1, MPI_COMM_WORLD,
-//                              &request[1]);
-//
-//                    MPI_Isend(&vdata_2[(A.Nx / 2 - 1) * A.localNy], A.localNy, MPI_DOUBLE, 1, 2, MPI_COMM_WORLD, &request[2]);
-//                    MPI_Irecv(&vdata_2[(A.Nx / 2) * A.localNy], A.localNy, MPI_DOUBLE, 1, 3, MPI_COMM_WORLD, &request[3]);
-//                    MPI_Waitall(4,request, status);
-                    MPI_Send(&udata_2[(A.Nx / 2 - 1) * A.localNy], A.localNy, MPI_DOUBLE, 1, 0, MPI_COMM_WORLD);
-                    MPI_Recv(&udata_2[(A.Nx / 2) * A.localNy], A.localNy, MPI_DOUBLE, 1, 1, MPI_COMM_WORLD,
-                             MPI_STATUS_IGNORE);
-                    MPI_Send(&vdata_2[(A.Nx / 2 - 1) * A.localNy], A.localNy, MPI_DOUBLE, 1, 2, MPI_COMM_WORLD);
-                    MPI_Recv(&vdata_2[(A.Nx / 2) * A.localNy], A.localNy, MPI_DOUBLE, 1, 3, MPI_COMM_WORLD,
-                             MPI_STATUS_IGNORE);
-
-                } else {
-//                    MPI_Irecv(&udata_2[0], A.localNy, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, &request[0]);
-//                    MPI_Isend(&udata_2[A.localNy], A.localNy, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD, &request[1]);
-//                    MPI_Irecv(&vdata_2[0], A.localNy, MPI_DOUBLE, 0, 2, MPI_COMM_WORLD,&request[2]);
-//                    MPI_Isend(&vdata_2[A.localNy], A.localNy, MPI_DOUBLE, 0, 3, MPI_COMM_WORLD, &request[3]);
-//                    MPI_Waitall(4,request, status);
-                    MPI_Recv(&udata_2[0], A.localNy, MPI_DOUBLE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    MPI_Send(&udata_2[A.localNy], A.localNy, MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
-                    MPI_Recv(&vdata_2[0], A.localNy, MPI_DOUBLE, 0, 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    MPI_Send(&vdata_2[A.localNy], A.localNy, MPI_DOUBLE, 0, 3, MPI_COMM_WORLD);
+                // If not part of rightmost column
+                if (A.world_rank / A.nPy != A.nPx - 1){
+                    MPI_Send(&udata_2[(A.localNx - 2) * A.localNy], A.localNy, MPI_DOUBLE, A.world_rank + A.nPy, 4 * A.world_rank - 2 * (A.world_rank / A.nPy - 1) - 1, MPI_COMM_WORLD); ///< Send rightside array to the rightside process
+                    MPI_Recv(&udata_2[(A.localNx - 1) * A.localNy], A.localNy, MPI_DOUBLE, A.world_rank + A.nPy, 4 * A.world_rank - 2 * (A.world_rank / A.nPy - 1), MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive rightside array from the right
                 }
+                // If not part of leftmost column
+                if (A.world_rank / A.nPy != 0){
+                    MPI_Recv(&udata_2[0], A.localNy, MPI_DOUBLE, A.world_rank - A.nPy, 4 * A.world_rank - 2 * (A.world_rank / A.nPy - 1) - 1 - (4 * A.nPy - 2), MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive leftside array from the leftside process
+                    MPI_Send(&udata_2[A.localNy], A.localNy, MPI_DOUBLE, A.world_rank - A.nPy, 4 * A.world_rank - 2 * (A.world_rank / A.nPy - 1) - (4 * A.nPy - 2), MPI_COMM_WORLD); ///< Send leftside array to the leftside process
+                }
+                // If not part of topmost row
+                if (A.world_rank % A.nPy != 0) {
+
+                    for (int i = 0; i < A.localNx; ++i) {
+                        MPI_Send(&udata_2[(A.localNx - 2) * A.localNy], A.localNy, MPI_DOUBLE, A.world_rank + A.nPy,
+                                 4 * A.world_rank - 2 * (A.world_rank / A.nPy - 1) - 1,
+                                 MPI_COMM_WORLD); ///< Send top array to the process above
+                    }
+                }
+
+
+
 
                 break;
             case 1 :
