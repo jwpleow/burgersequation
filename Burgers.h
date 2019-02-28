@@ -71,6 +71,15 @@ private:
     double* vdata_2;
     double* ucombineddata_;
     double* vcombineddata_;
+
+//    double* utoparraysend;
+//    double* utoparrayreceive;
+//    double* ubtmarraysend;
+//    double* ubtmarrayreceive;
+//    double* vtoparraysend;
+//    double* vtoparrayreceive;
+//    double* vbtmarraysend;
+//    double* vbtmarrayreceive;
 };
 
 
