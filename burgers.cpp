@@ -111,18 +111,18 @@ int main(int argc, char* argv[]) {
 //    }
 //
 
-//    if (m.world_rank == 0) std::cout << "Time integrating velocity field...\n";
-//    // Check the time taken for calculation
-//    typedef std::chrono::high_resolution_clock hrc;
-//    typedef std::chrono::milliseconds ms;
-//    hrc::time_point start = hrc::now();
+    if (m.world_rank == 0) std::cout << "Time integrating velocity field...\n";
+    // Check the time taken for calculation
+    typedef std::chrono::high_resolution_clock hrc;
+    typedef std::chrono::milliseconds ms;
+    hrc::time_point start = hrc::now();
 
 //     Time integrate the velocity field
-//    b.TimeIntegrateVelField(m);
+    b.TimeIntegrateVelField(m);
 
-//    // Print time taken to time integrate the field
-//    hrc::time_point end = hrc::now();
-//    std::cout << "Time taken: " << std::chrono::duration_cast<ms>(end - start).count() << "ms\n";
+    // Print time taken to time integrate the field
+    hrc::time_point end = hrc::now();
+    std::cout << "Time taken: " << std::chrono::duration_cast<ms>(end - start).count() << "ms\n";
 
 
 
