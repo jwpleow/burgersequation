@@ -27,13 +27,30 @@ int main(int argc, char* argv[]) {
     b.SetVelField(m); ///< Calculate the initial velocity field from initial conditions
 
 
+
+
+    if (m.world_rank == 0) std::cout << "Time integrating velocity field...\n";
+    // Check the time taken for calculation
+    typedef std::chrono::high_resolution_clock hrc;
+    typedef std::chrono::milliseconds ms;
+    hrc::time_point start = hrc::now();
+
+//     Time integrate the velocity field
+    b.TimeIntegrateVelField(m);
+
+    // Print time taken to time integrate the field
+    hrc::time_point end = hrc::now();
+    std::cout << "Time taken: " << std::chrono::duration_cast<ms>(end - start).count() << "ms\n";
+
+
+
 //    if (m.world_rank == 0) {
 //        std::cout << " combined vel field: \n";
 //        b.DisplayCombinedufield(m);
 //
 //    }
 //
-//    // velocity field printers
+    // velocity field printers
 //    if (m.world_rank == 0) {
 //        std::chrono::seconds dura(1);
 //        std::this_thread::sleep_for(dura);
@@ -109,23 +126,6 @@ int main(int argc, char* argv[]) {
 //        std::cout << m.world_rank << " vel field: \n";
 //        b.DisplayuVelField(m);
 //    }
-//
-
-    if (m.world_rank == 0) std::cout << "Time integrating velocity field...\n";
-    // Check the time taken for calculation
-    typedef std::chrono::high_resolution_clock hrc;
-    typedef std::chrono::milliseconds ms;
-    hrc::time_point start = hrc::now();
-
-//     Time integrate the velocity field
-    b.TimeIntegrateVelField(m);
-
-    // Print time taken to time integrate the field
-    hrc::time_point end = hrc::now();
-    std::cout << "Time taken: " << std::chrono::duration_cast<ms>(end - start).count() << "ms\n";
-
-
-
 
 
 //    // Calculate final energy
