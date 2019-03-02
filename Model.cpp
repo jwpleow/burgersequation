@@ -128,19 +128,3 @@ void Model::PrintParameters() {
     std::cout << "b:  " << b << '\n';
     std::cout << "c:  " << c << '\n';
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

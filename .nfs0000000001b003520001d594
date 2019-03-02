@@ -450,3 +450,11 @@ double Burgers::EnergyOfVelField(Model &A) {
     return 0.5 * (F77NAME(ddot)(A.Nx * A.Ny, ucombineddata_, 1, ucombineddata_, 1) + F77NAME(ddot)(A.Nx * A.Ny, vcombineddata_, 1, vcombineddata_, 1)) * A.dx * A.dy;
 
 }
+
+
+
+
+
+
+
+

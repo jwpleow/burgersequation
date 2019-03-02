@@ -12,17 +12,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5e8f15d3-92bb-4168-9f5c-06a6bbc9087b" name="Default Changelist" comment="Building the Model and Burgers Classes v1">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.nfs0000000001b000c10001c753" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Burgers.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Burgers.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Burgers.h" beforeDir="false" afterPath="$PROJECT_DIR$/Burgers.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Burgers.o" beforeDir="false" afterPath="$PROJECT_DIR$/Burgers.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Model.h" beforeDir="false" afterPath="$PROJECT_DIR$/Model.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VelocityFields.txt" beforeDir="false" afterPath="$PROJECT_DIR$/VelocityFields.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Model.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Model.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/burgers.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/burgers.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/burgers.o" beforeDir="false" afterPath="$PROJECT_DIR$/burgers.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/myProg" beforeDir="false" afterPath="$PROJECT_DIR$/myProg" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -46,8 +38,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/burgers.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="761">
-              <caret line="28" selection-start-line="28" selection-end-line="28" />
+            <state relative-caret-position="1215">
+              <caret line="51" column="1" selection-start-line="51" selection-start-column="1" selection-end-line="51" selection-end-column="1" />
               <folding>
                 <element signature="e#412#429#0" expanded="true" />
               </folding>
@@ -55,10 +47,10 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Model.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1152">
+            <state relative-caret-position="-765">
               <caret line="32" column="14" lean-forward="true" selection-start-line="32" selection-start-column="14" selection-end-line="32" selection-end-column="14" />
             </state>
           </provider>
@@ -67,8 +59,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Model.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-19">
-              <caret line="34" column="105" selection-start-line="34" selection-start-column="96" selection-end-line="34" selection-end-column="105" />
+            <state relative-caret-position="1215">
+              <caret line="129" column="1" selection-start-line="129" selection-start-column="1" selection-end-line="129" selection-end-column="1" />
               <folding>
                 <element signature="e#34#53#0" expanded="true" />
               </folding>
@@ -79,7 +71,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Burgers.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1080">
+            <state relative-caret-position="-189">
               <caret line="30" selection-start-line="30" selection-end-line="30" />
               <folding>
                 <element signature="e#147#163#0" expanded="true" />
@@ -88,13 +80,13 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Burgers.cpp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="4" column="66" selection-start-line="4" selection-start-column="66" selection-end-line="4" selection-end-column="66" />
+            <state relative-caret-position="2079">
+              <caret line="452" lean-forward="true" selection-start-line="452" selection-end-line="452" />
               <folding>
-                <marker date="1551556307820" expanded="true" signature="19184:20620" ph="..." />
+                <marker date="1551557159700" expanded="true" signature="19184:20620" ph="..." />
               </folding>
             </state>
           </provider>
@@ -119,11 +111,11 @@
         <option value="$PROJECT_DIR$/Makefile.txt" />
         <option value="$PROJECT_DIR$/Makefile" />
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
-        <option value="$PROJECT_DIR$/Model.cpp" />
-        <option value="$PROJECT_DIR$/Burgers.cpp" />
-        <option value="$PROJECT_DIR$/burgers.cpp" />
         <option value="$PROJECT_DIR$/Burgers.h" />
         <option value="$PROJECT_DIR$/Model.h" />
+        <option value="$PROJECT_DIR$/burgers.cpp" />
+        <option value="$PROJECT_DIR$/Model.cpp" />
+        <option value="$PROJECT_DIR$/Burgers.cpp" />
       </list>
     </option>
   </component>
@@ -200,12 +192,12 @@
       <workItem from="1551104539302" duration="87397000" />
       <workItem from="1551368077127" duration="25358000" />
       <workItem from="1551448246148" duration="11325000" />
-      <workItem from="1551460974896" duration="18905000" />
+      <workItem from="1551460974896" duration="19115000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="258949000" />
+    <option name="totallyTimeSpent" value="259159000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -356,29 +348,36 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Model.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-19">
-          <caret line="34" column="105" selection-start-line="34" selection-start-column="96" selection-end-line="34" selection-end-column="105" />
-          <folding>
-            <element signature="e#34#53#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/burgers.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="761">
-          <caret line="28" selection-start-line="28" selection-end-line="28" />
+        <state relative-caret-position="1215">
+          <caret line="51" column="1" selection-start-line="51" selection-start-column="1" selection-end-line="51" selection-end-column="1" />
           <folding>
             <element signature="e#412#429#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Model.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-765">
+          <caret line="32" column="14" lean-forward="true" selection-start-line="32" selection-start-column="14" selection-end-line="32" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Model.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1215">
+          <caret line="129" column="1" selection-start-line="129" selection-start-column="1" selection-end-line="129" selection-end-column="1" />
+          <folding>
+            <element signature="e#34#53#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Burgers.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1080">
+        <state relative-caret-position="-189">
           <caret line="30" selection-start-line="30" selection-end-line="30" />
           <folding>
             <element signature="e#147#163#0" expanded="true" />
@@ -388,18 +387,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Burgers.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="144">
-          <caret line="4" column="66" selection-start-line="4" selection-start-column="66" selection-end-line="4" selection-end-column="66" />
+        <state relative-caret-position="2079">
+          <caret line="452" lean-forward="true" selection-start-line="452" selection-end-line="452" />
           <folding>
-            <marker date="1551556307820" expanded="true" signature="19184:20620" ph="..." />
+            <marker date="1551557159700" expanded="true" signature="19184:20620" ph="..." />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Model.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1152">
-          <caret line="32" column="14" lean-forward="true" selection-start-line="32" selection-start-column="14" selection-end-line="32" selection-end-column="14" />
         </state>
       </provider>
     </entry>
