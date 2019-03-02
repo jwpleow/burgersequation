@@ -46,10 +46,6 @@ Model::Model(int argc, char *argv[]) {
         localstart += ((Ny - 2) / nPy) * (world_rank % nPy);
     }
 
-
-    std::cout<< "My rank is: " <<  world_rank << " localNy: " << localNy << " localNx: " << localNx << " localstart: "<< localstart << std::endl;
-
-
 }
 
 // Destructor
@@ -128,19 +124,3 @@ void Model::PrintParameters() {
     std::cout << "b:  " << b << '\n';
     std::cout << "c:  " << c << '\n';
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

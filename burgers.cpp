@@ -41,13 +41,12 @@ int main(int argc, char* argv[]) {
     std::cout << "Rank: " << m.world_rank << ", Time taken: " << std::chrono::duration_cast<ms>(end - start).count()
               << "ms\n";
 
-    // Display the Total Energy
-    if (m.world_rank == 0)  std::cout << "Energy of velocity field: " << std::setprecision(5) << b.EnergyOfVelField(m) << std::endl;
-
-    // Print the final velocity field to VelocityFields.txt
-    b.FilePrintVelFields(m);
+    // Display the Total Energy and print the velocity field to VelocityFields.txt
+    if (m.world_rank == 0) {
+        std::cout << "Energy of velocity field: " << std::setprecision(5) << b.EnergyOfVelField(m) << std::endl;
+        b.FilePrintVelFields(m);
+    }
 
 
     return 0;
 }
-

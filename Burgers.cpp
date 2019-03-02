@@ -20,6 +20,8 @@ Burgers::~Burgers() {
 //        delete[] ucombineddata_;
 //        delete[] vcombineddata_;
 //    }
+    delete[] ucombineddata_;
+    delete[] vcombineddata_;
 };
 
 // Member function to set the initial velocity field and distribute them to the processes
@@ -50,7 +52,7 @@ void Burgers::SetVelField(Model &A) {
     MPI_Bcast(ucombineddata_, A.Nx * A.Ny , MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Bcast(vcombineddata_, A.Nx * A.Ny , MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-    // Split the initialised velocity data
+    // Assign only the relevant local velocity field needed by the individual process
     for (int i = 0; i < A.localNx; ++i) {
         for (int j = 0; j < A.localNy; ++j) {
             udata_[i * A.localNy + j] = ucombineddata_[A.localstart + i * A.Ny + j];
@@ -59,13 +61,15 @@ void Burgers::SetVelField(Model &A) {
     }
 
     // Free the unnecessary dynamic arrays on other processes
-    if (A.world_rank != 0) {
-        delete[] ucombineddata_;
-        delete[] vcombineddata_;
-    }
+//    if (A.world_rank != 0) {
+//        delete[] ucombineddata_;
+//        delete[] vcombineddata_;
+//    }
 
 }
 
+
+// Member functions to print to screen the current u/v velocity fields (use only for checking small discretisations!)
 void Burgers::DisplayuVelField(Model &A) {
 
     std::cout << "Current u Velocity Field: \n";
@@ -93,7 +97,9 @@ void Burgers::DisplayvVelField(Model &A) {
 // Member function that integrates the velocity fields for the parameters specified in Model &A and with initial conditions from SetVelField
 void Burgers::TimeIntegrateVelField(Model &A) {
 
-    // Initialise arrays to transfer the row edges - can make this faster by bringing this out of timeintegrate
+    //  * * * * * * * * * * Prepare arrays and constants * * * * * * * * * * * //
+
+    // Initialise arrays to transfer the row edges for MPI - can make this faster by bringing this out of timeintegrate
     auto* utoparraysend = new double[A.localNx]();
     auto* utoparrayreceive = new double[A.localNx]();
     auto* ubtmarraysend = new double[A.localNx]();
@@ -103,9 +109,11 @@ void Burgers::TimeIntegrateVelField(Model &A) {
     auto* vbtmarraysend = new double[A.localNx]();
     auto* vbtmarrayreceive = new double[A.localNx]();
 
-    // Precalculate constants for use in the multiplication
+    // Precalculate constants used in the for loops
     double cdt_dxsq, cdt_dysq, axdt_dx, aydt_dy, bdt_dx, bdt_dy, const1, const2, const3;
+    int MPIconst1, MPIconst2;
 
+    // Constants used in the explicit Forward Euler method
     cdt_dxsq = A.c * A.dt / (A.dx * A.dx);
     cdt_dysq = A.c * A.dt / (A.dy * A.dy);
     axdt_dx = A.ax * A.dt / A.dx;
@@ -116,7 +124,13 @@ void Burgers::TimeIntegrateVelField(Model &A) {
     const2 = (cdt_dxsq + axdt_dx);
     const3 = (cdt_dysq + aydt_dy);
 
+    // Constants used for tags in MPI Send/Receives
+    MPIconst1 = 4 * A.world_rank - (4 * A.nPy);
+    MPIconst2 = 4 * (A.world_rank - A.world_rank / A.nPy) + (A.nPx - 1) * 4 * A.nPy;
+
+
     // * * * * * * * * * * * * * Time Integration Loop * * * * * * * * * * * * * * * //
+
     for (int t = 0; t < A.Nt; ++t) { ///< iterate over the timesteps
         // Switch to alternate between using data in udata_/vdata_ and udata_2/vdata_2
         switch (t % 2) {
@@ -152,23 +166,23 @@ void Burgers::TimeIntegrateVelField(Model &A) {
                 }
                 // If not part of leftmost column - Send and receive data from the left
                 if (A.world_rank / A.nPy != 0){
-                    MPI_Recv(&udata_2[0], A.localNy, MPI_DOUBLE, A.world_rank - A.nPy, 4 * A.world_rank - (4 * A.nPy), MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive leftside array from the leftside process
-                    MPI_Send(&udata_2[A.localNy], A.localNy, MPI_DOUBLE, A.world_rank - A.nPy, 4 * A.world_rank - (4 * A.nPy) + 1, MPI_COMM_WORLD); ///< Send leftside array to the leftside process
-                    MPI_Recv(&vdata_2[0], A.localNy, MPI_DOUBLE, A.world_rank - A.nPy, 4 * A.world_rank - (4 * A.nPy) + 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive leftside array from the leftside process
-                    MPI_Send(&vdata_2[A.localNy], A.localNy, MPI_DOUBLE, A.world_rank - A.nPy, 4 * A.world_rank - (4 * A.nPy) + 3, MPI_COMM_WORLD); ///< Send leftside array to the leftside process
+                    MPI_Recv(&udata_2[0], A.localNy, MPI_DOUBLE, A.world_rank - A.nPy, MPIconst1, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive leftside array from the leftside process
+                    MPI_Send(&udata_2[A.localNy], A.localNy, MPI_DOUBLE, A.world_rank - A.nPy, MPIconst1 + 1, MPI_COMM_WORLD); ///< Send leftside array to the leftside process
+                    MPI_Recv(&vdata_2[0], A.localNy, MPI_DOUBLE, A.world_rank - A.nPy, MPIconst1 + 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive leftside array from the leftside process
+                    MPI_Send(&vdata_2[A.localNy], A.localNy, MPI_DOUBLE, A.world_rank - A.nPy, MPIconst1 + 3, MPI_COMM_WORLD); ///< Send leftside array to the leftside process
 
                 }
-                 //If not part of topmost row - Send and receive data from the top
+                //If not part of topmost row - Send and receive data from the top
                 if (A.world_rank % A.nPy != 0) {
                     // Prepare an array of values from the 2nd row from the top
                     for (int i = 0; i < A.localNx; ++i) {
                         utoparraysend[i] = udata_2[i * A.localNy + 1];
                         vtoparraysend[i] = vdata_2[i * A.localNy + 1];
                     }
-                    MPI_Send(utoparraysend, A.localNx, MPI_DOUBLE, A.world_rank - 1, 4 * (A.world_rank - A.world_rank / A.nPy) + (A.nPx - 1) * 4 * A.nPy - 4, MPI_COMM_WORLD); ///< Send top array to the process above
-                    MPI_Recv(utoparrayreceive, A.localNx, MPI_DOUBLE, A.world_rank - 1, 4 * (A.world_rank - A.world_rank / A.nPy) + (A.nPx - 1) * 4 * A.nPy - 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive the top array from the process above
-                    MPI_Send(vtoparraysend, A.localNx, MPI_DOUBLE, A.world_rank - 1, 4 * (A.world_rank - A.world_rank / A.nPy) + (A.nPx - 1) * 4 * A.nPy - 2, MPI_COMM_WORLD); ///< Send top array to the process above
-                    MPI_Recv(vtoparrayreceive, A.localNx, MPI_DOUBLE, A.world_rank - 1, 4 * (A.world_rank - A.world_rank / A.nPy) + (A.nPx - 1) * 4 * A.nPy - 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive the top array from the process above
+                    MPI_Send(utoparraysend, A.localNx, MPI_DOUBLE, A.world_rank - 1, MPIconst2 - 4, MPI_COMM_WORLD); ///< Send top array to the process above
+                    MPI_Recv(utoparrayreceive, A.localNx, MPI_DOUBLE, A.world_rank - 1, MPIconst2 - 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive the top array from the process above
+                    MPI_Send(vtoparraysend, A.localNx, MPI_DOUBLE, A.world_rank - 1, MPIconst2 - 2, MPI_COMM_WORLD); ///< Send top array to the process above
+                    MPI_Recv(vtoparrayreceive, A.localNx, MPI_DOUBLE, A.world_rank - 1, MPIconst2 - 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive the top array from the process above
                     // After receiving, parse the data into the top row
                     for (int i = 0; i < A.localNx; ++i) {
                         udata_2[i * A.localNy] = utoparrayreceive[i];
@@ -182,16 +196,16 @@ void Burgers::TimeIntegrateVelField(Model &A) {
                         ubtmarraysend[i] = udata_2[i * A.localNy + (A.localNy - 2)];
                         vbtmarraysend[i] = vdata_2[i * A.localNy + (A.localNy - 2)];
                     }
-                    MPI_Recv(ubtmarrayreceive, A.localNx, MPI_DOUBLE, A.world_rank + 1, 4 * (A.world_rank - A.world_rank / A.nPy) + (A.nPx - 1) * 4 * A.nPy, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    MPI_Send(ubtmarraysend, A.localNx, MPI_DOUBLE, A.world_rank + 1, 4 * (A.world_rank - A.world_rank / A.nPy) + (A.nPx - 1) * 4 * A.nPy + 1, MPI_COMM_WORLD);
-                    MPI_Recv(vbtmarrayreceive, A.localNx, MPI_DOUBLE, A.world_rank + 1, 4 * (A.world_rank - A.world_rank / A.nPy) + (A.nPx - 1) * 4 * A.nPy + 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    MPI_Send(vbtmarraysend, A.localNx, MPI_DOUBLE, A.world_rank + 1, 4 * (A.world_rank - A.world_rank / A.nPy) + (A.nPx - 1) * 4 * A.nPy + 3, MPI_COMM_WORLD);
+                    MPI_Recv(ubtmarrayreceive, A.localNx, MPI_DOUBLE, A.world_rank + 1, MPIconst2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    MPI_Send(ubtmarraysend, A.localNx, MPI_DOUBLE, A.world_rank + 1, MPIconst2 + 1, MPI_COMM_WORLD);
+                    MPI_Recv(vbtmarrayreceive, A.localNx, MPI_DOUBLE, A.world_rank + 1, MPIconst2 + 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    MPI_Send(vbtmarraysend, A.localNx, MPI_DOUBLE, A.world_rank + 1, MPIconst2 + 3, MPI_COMM_WORLD);
                     // After receiving, parse the data into the bottom row
                     for (int i = 0; i < A.localNx; ++i) {
                         udata_2[i * A.localNy + (A.localNy - 1)] = ubtmarrayreceive[i];
                         vdata_2[i * A.localNy + (A.localNy - 1)] = vbtmarrayreceive[i];
                     }
-              }
+                }
                 break;
             case 1 :
                 for (int i = 1; i < A.localNx - 1; ++i) { ///< i is the column tracker
@@ -228,10 +242,10 @@ void Burgers::TimeIntegrateVelField(Model &A) {
                 }
                 // If not part of leftmost column - Send and receive data from the left
                 if (A.world_rank / A.nPy != 0){
-                    MPI_Recv(&udata_[0], A.localNy, MPI_DOUBLE, A.world_rank - A.nPy, 4 * A.world_rank - (4 * A.nPy), MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive leftside array from the leftside process
-                    MPI_Send(&udata_[A.localNy], A.localNy, MPI_DOUBLE, A.world_rank - A.nPy, 4 * A.world_rank - (4 * A.nPy) + 1, MPI_COMM_WORLD); ///< Send leftside array to the leftside process
-                    MPI_Recv(&vdata_[0], A.localNy, MPI_DOUBLE, A.world_rank - A.nPy, 4 * A.world_rank - (4 * A.nPy) + 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive leftside array from the leftside process
-                    MPI_Send(&vdata_[A.localNy], A.localNy, MPI_DOUBLE, A.world_rank - A.nPy, 4 * A.world_rank - (4 * A.nPy) + 3, MPI_COMM_WORLD); ///< Send leftside array to the leftside process
+                    MPI_Recv(&udata_[0], A.localNy, MPI_DOUBLE, A.world_rank - A.nPy, MPIconst1, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive leftside array from the leftside process
+                    MPI_Send(&udata_[A.localNy], A.localNy, MPI_DOUBLE, A.world_rank - A.nPy, MPIconst1 + 1, MPI_COMM_WORLD); ///< Send leftside array to the leftside process
+                    MPI_Recv(&vdata_[0], A.localNy, MPI_DOUBLE, A.world_rank - A.nPy, MPIconst1 + 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive leftside array from the leftside process
+                    MPI_Send(&vdata_[A.localNy], A.localNy, MPI_DOUBLE, A.world_rank - A.nPy, MPIconst1 + 3, MPI_COMM_WORLD); ///< Send leftside array to the leftside process
 
                 }
                 //If not part of topmost row - Send and receive data from the top
@@ -241,10 +255,10 @@ void Burgers::TimeIntegrateVelField(Model &A) {
                         utoparraysend[i] = udata_[i * A.localNy + 1];
                         vtoparraysend[i] = vdata_[i * A.localNy + 1];
                     }
-                    MPI_Send(utoparraysend, A.localNx, MPI_DOUBLE, A.world_rank - 1, 4 * (A.world_rank - A.world_rank / A.nPy) + (A.nPx - 1) * 4 * A.nPy - 4, MPI_COMM_WORLD); ///< Send top array to the process above
-                    MPI_Recv(utoparrayreceive, A.localNx, MPI_DOUBLE, A.world_rank - 1, 4 * (A.world_rank - A.world_rank / A.nPy) + (A.nPx - 1) * 4 * A.nPy - 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive the top array from the process above
-                    MPI_Send(vtoparraysend, A.localNx, MPI_DOUBLE, A.world_rank - 1, 4 * (A.world_rank - A.world_rank / A.nPy) + (A.nPx - 1) * 4 * A.nPy - 2, MPI_COMM_WORLD); ///< Send top array to the process above
-                    MPI_Recv(vtoparrayreceive, A.localNx, MPI_DOUBLE, A.world_rank - 1, 4 * (A.world_rank - A.world_rank / A.nPy) + (A.nPx - 1) * 4 * A.nPy - 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive the top array from the process above
+                    MPI_Send(utoparraysend, A.localNx, MPI_DOUBLE, A.world_rank - 1, MPIconst2 - 4, MPI_COMM_WORLD); ///< Send top array to the process above
+                    MPI_Recv(utoparrayreceive, A.localNx, MPI_DOUBLE, A.world_rank - 1, MPIconst2 - 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive the top array from the process above
+                    MPI_Send(vtoparraysend, A.localNx, MPI_DOUBLE, A.world_rank - 1, MPIconst2 - 2, MPI_COMM_WORLD); ///< Send top array to the process above
+                    MPI_Recv(vtoparrayreceive, A.localNx, MPI_DOUBLE, A.world_rank - 1, MPIconst2 - 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive the top array from the process above
                     // After receiving, parse the data into the top row
                     for (int i = 0; i < A.localNx; ++i) {
                         udata_[i * A.localNy] = utoparrayreceive[i];
@@ -259,10 +273,10 @@ void Burgers::TimeIntegrateVelField(Model &A) {
                         ubtmarraysend[i] = udata_[i * A.localNy + (A.localNy - 2)];
                         vbtmarraysend[i] = vdata_[i * A.localNy + (A.localNy - 2)];
                     }
-                    MPI_Recv(ubtmarrayreceive, A.localNx, MPI_DOUBLE, A.world_rank + 1, 4 * (A.world_rank - A.world_rank / A.nPy) + (A.nPx - 1) * 4 * A.nPy, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    MPI_Send(ubtmarraysend, A.localNx, MPI_DOUBLE, A.world_rank + 1, 4 * (A.world_rank - A.world_rank / A.nPy) + (A.nPx - 1) * 4 * A.nPy + 1, MPI_COMM_WORLD);
-                    MPI_Recv(vbtmarrayreceive, A.localNx, MPI_DOUBLE, A.world_rank + 1, 4 * (A.world_rank - A.world_rank / A.nPy) + (A.nPx - 1) * 4 * A.nPy + 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    MPI_Send(vbtmarraysend, A.localNx, MPI_DOUBLE, A.world_rank + 1, 4 * (A.world_rank - A.world_rank / A.nPy) + (A.nPx - 1) * 4 * A.nPy + 3, MPI_COMM_WORLD);
+                    MPI_Recv(ubtmarrayreceive, A.localNx, MPI_DOUBLE, A.world_rank + 1, MPIconst2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    MPI_Send(ubtmarraysend, A.localNx, MPI_DOUBLE, A.world_rank + 1, MPIconst2 + 1, MPI_COMM_WORLD);
+                    MPI_Recv(vbtmarrayreceive, A.localNx, MPI_DOUBLE, A.world_rank + 1, MPIconst2 + 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                    MPI_Send(vbtmarraysend, A.localNx, MPI_DOUBLE, A.world_rank + 1, MPIconst2 + 3, MPI_COMM_WORLD);
                     // After receiving, parse the data into the bottom row
                     for (int i = 0; i < A.localNx; ++i) {
                         udata_[i * A.localNy + (A.localNy - 1)] = ubtmarrayreceive[i];
@@ -289,7 +303,7 @@ void Burgers::TimeIntegrateVelField(Model &A) {
     }
 
 
-    // * * * * * * * * * * * * * Assemble the combined data * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * Assembling the velocity field matrix * * * * * * * * * * * * * * //
 
     // First, remove the edge columns/rows so that there is no overlapping data
 
@@ -450,11 +464,3 @@ double Burgers::EnergyOfVelField(Model &A) {
     return 0.5 * (F77NAME(ddot)(A.Nx * A.Ny, ucombineddata_, 1, ucombineddata_, 1) + F77NAME(ddot)(A.Nx * A.Ny, vcombineddata_, 1, vcombineddata_, 1)) * A.dx * A.dy;
 
 }
-
-
-
-
-
-
-
-
