@@ -14,17 +14,23 @@ friend class Burgers;
 public:
 
     // * * * * * * * * * * * * * * CONSTRUCTOR * * * * * * * * * * * * * * * * //
+
     Model(int argc, char *argv[]);
+
     // * * * * * * * * * * * * * * DESTRUCTOR  * * * * * * * * * * * * * * * * //
+
     ~Model();
+
     // * * * * * * * * * * * * * * MEMBER FUNCTIONS  * * * * * * * * * * * * * //
-    void PrintParameters();
+
+    void PrintParameters(); ///< Function to display the parameters of the model
 
     // bool IsValid(); ///< think about writing this and calling immediately after initialisation?
 
     // bool   IsVerbose() const { return verbose; } ///< tells user what it does (Extra information)
     // bool   IsHelp()    const { return help; } ///< print out available command line options
 
+    // Getters
     double GetX0() const { return x0; }
     double GetY0() const { return y0; }
     double GetLx() const { return Lx; }
@@ -35,25 +41,20 @@ public:
     int GetNt() const { return Nt; }
     double GetDx() const { return dx; }
     double GetDy() const { return dy; }
-
     double GetDt() const { return dt; }
-
     double GetAx() const { return ax; }
-
     double GetAy() const { return ay; }
-
     double GetB() const { return b; }
-
     double GetC() const { return c; }
 
-
-    // MPI handles
-    int retval, retval_rank, world_rank, world_size,  retval_size, nPx, nPy;
+    // MPI variables needed
+    int retval, retval_rank, world_rank, world_size, retval_size, nPx, nPy;
 
 private:
-    void ParseParameters(int argc, char *argv[]);
 
-    void ValidateParameters(int argc);
+    void ParseParameters(int argc, char *argv[]); ///< Member function to parse the parameters from input arguments
+
+    void ValidateParameters(int argc); ///< Member function to validate the given parameters
 
     //bool verbose;
     //bool help;
@@ -71,18 +72,14 @@ private:
     double dy; ///< y direction discretisation
     double dt; ///< time discretisation / length of time step
 
-
-
-
     // Physics
     double ax; ///< coefficient a_x
     double ay; ///< coefficient a_y
     double b;  ///< coefficient b
     double c;  ///< coefficient c
 
-    // MPI handles
+    // MPI variables needed
     int localNx, localNy, localstart;
-
 
 };
 

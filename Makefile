@@ -1,7 +1,7 @@
 CXX = mpicxx
 CXXFLAGS = -std=c++14 -Wall -O3
 
-default: burg
+default: burgpn
 
 all: diff advx advx burg
 
@@ -19,16 +19,40 @@ compile: burgers.o Burgers.o Model.o
 
 # Test cases: Arguments are given in the order (after ./myProg): Lx Ly T Nx Ny Nt ax ay b c Px Py
 diff: compile
-	mpiexec -np 2 ./myProg 10 10 1 101 201 4000 0 0 0 1
+	mpiexec -np 1 ./myProg 10 10 1 2001 2001 4000 0 0 0 1 1 1
 
 advx: compile
-	mpiexec -np 2 ./myProg 10 10 1 101 201 4000 1 0 0 0
+	mpiexec -np 1 ./myProg 10 10 1 2001 2001 4000 1 0 0 0 1 1
 
 advy: compile
-	mpiexec -np 2 ./myProg 10 10 1 101 201 4000 0 1 0 0
+	mpiexec -np 1 ./myProg 10 10 1 2001 2001 4000 0 1 0 0 1 1
 
 burg: compile
-	mpiexec -np 6 ./myProg 10 10 1 21 31 4000 1 0.5 1 0.02 3 2
+	mpiexec -np 1 ./myProg 10 10 1 21 31 4000 1 0.5 1 0.02 1 1
+
+diffp: compile
+	mpiexec -np 2 ./myProg 10 10 1 101 201 4000 0 0 0 1 2 1
+
+advxp: compile
+	mpiexec -np 2 ./myProg 10 10 1 101 201 4000 1 0 0 0 2 1
+
+advyp: compile
+	mpiexec -np 2 ./myProg 10 10 1 101 201 4000 0 1 0 0 2 1
+
+burgp: compile
+	mpiexec -np 2 ./myProg 10 10 1 21 31 4000 1 0.5 1 0.02 2 1
+
+diffpn: compile
+	mpiexec -np 2 ./myProg 10 10 1 101 201 4000 0 0 0 1 2 1
+
+advxpn: compile
+	mpiexec -np 2 ./myProg 10 10 1 101 201 4000 1 0 0 0 2 1
+
+advypn: compile
+	mpiexec -np 2 ./myProg 10 10 1 101 201 4000 0 1 0 0 2 1
+
+burgpn: compile
+	mpiexec -np 16 ./myProg 10 10 1 2001 2001 4000 1 0.5 1 0.02 4 4
 
 # Rule to clean the source directory
 .PHONY: clean
