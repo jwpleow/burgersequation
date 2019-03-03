@@ -1,3 +1,0 @@
-/home/jwl16/Desktop/hpc-exercises/Coursework/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/jwl16/Desktop/hpc-exercises/Coursework/cmake-build-debug/CMakeFiles/Coursework.dir
-/home/jwl16/Desktop/hpc-exercises/Coursework/cmake-build-debug/CMakeFiles/edit_cache.dir
