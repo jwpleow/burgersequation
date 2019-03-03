@@ -8,57 +8,21 @@
 /// Constructor that takes in the required parameters from the argument
 Model::Model(int argc, char *argv[]) {
 
-    // Initialise and check MPI
-    retval = MPI_Init(&argc, &argv);
-    if(retval != MPI_SUCCESS){
-        throw std::runtime_error("An error occurred initialising MPI");
-    }
-
-    retval_rank = MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-    retval_size = MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-    if (retval_rank == MPI_ERR_COMM || retval_size == MPI_ERR_COMM){
-        std::cout << "Invalid Communicator!" << std::endl;
-    }
-
-
-
+    // Call functions to parse and validate the parameters provided through the command line
     ParseParameters(argc, argv);
     ValidateParameters(argc);
-
-    // Arrange process ranks in column major format
-    // This section finds the localNx and Ny sizes, as well as the start location of each array
-    // allocate the last columns of processes to have the extra+1 in localNx
-    // (LHS of if is column no., RHS is the columns that will not need to be assigned the extra+1 localNx)
-    // and  find the starting position of the processor grid localNx/Ny array in the global Nx*Ny array
-    if (world_rank / nPy > nPx - 1 - ((Nx - 2) % nPx)) {
-        localNx = (Nx - 2) / nPx + 2 + 1;
-        localstart = (((Nx - 2) / nPx) * (world_rank / nPy) + ((world_rank / nPy) - (nPx - (Nx - 2) % nPx))) * Ny;
-    } else {
-        localNx = (Nx - 2) / nPx + 2;
-        localstart = (((Nx - 2) / nPx) * (world_rank / nPy)) * Ny;
-    }
-    // allocate the last rows of the processes to have the extra+1 in localNy (LHS of if is row no., RHS is the rows that will not need to be assigned the extra+1 localNx)
-    if (world_rank % nPy > nPy - 1 - ((Ny - 2) % nPy)) {
-        localNy = (Ny - 2) / nPy + 2 + 1;
-        localstart += ((Ny - 2) / nPy) * (world_rank % nPy) + ((world_rank % nPy) - (nPy - (Ny - 2) % nPy));
-    } else {
-        localNy = (Ny - 2) / nPy + 2;
-        localstart += ((Ny - 2) / nPy) * (world_rank % nPy);
-    }
 
 }
 
 // Destructor
 Model::~Model() {
 
-    // Terminate Parallel Execution environment
-    MPI_Finalize();
 
 }
 
 void Model::ParseParameters(int argc, char *argv[]) {
 
-    /// Parse argument char array into the relevant variables (sto also checks for invalid datatype args)
+    /// Parse argument char array into the relevant variables
 
     Lx = std::stod(argv[1]);
     Ly = std::stod(argv[2]);
@@ -70,8 +34,6 @@ void Model::ParseParameters(int argc, char *argv[]) {
     ay = std::stod(argv[8]);
     b = std::stod(argv[9]);
     c = std::stod(argv[10]);
-    nPx = std::stoi(argv[11]);
-    nPy = std::stoi(argv[12]);
     dx = Lx / (Nx - 1);
     dy = Ly / (Ny - 1);
     dt = T / (Nt);
@@ -80,15 +42,10 @@ void Model::ParseParameters(int argc, char *argv[]) {
 }
 
 void Model::ValidateParameters(int argc) {
-    // Check Px * Py = number of processes
-    if (nPx * nPy != world_size) {
-        throw std::invalid_argument("Number of processes do not match -np initialisation!");
-    }
     // Check number of arguments are correct
-    if (argc != 13) {
+    if (argc != 11) {
         throw std::invalid_argument("Incorrect number of arguments!");
     }
-
     // Check for negative final time input
     if (T <= 0) {
         throw std::invalid_argument("Final Time must be greater than 0!");
@@ -124,3 +81,19 @@ void Model::PrintParameters() {
     std::cout << "b:  " << b << '\n';
     std::cout << "c:  " << c << '\n';
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
