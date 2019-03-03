@@ -13,15 +13,15 @@ class Model {
 friend class Burgers;
 public:
 
-    // * * * * * * * * * * * * * * CONSTRUCTOR * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * * //
 
     Model(int argc, char *argv[]);
 
-    // * * * * * * * * * * * * * * DESTRUCTOR  * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * * //
 
     ~Model();
 
-    // * * * * * * * * * * * * * * MEMBER FUNCTIONS  * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * //
 
     void PrintParameters(); ///< Function to display the parameters of the model
 
@@ -79,7 +79,9 @@ private:
     double c;  ///< coefficient c
 
     // MPI variables needed
-    int localNx, localNy, localstart;
+    int localNx; ///< Local Nx domain size (the Nx size for the velocity field of the individual process)
+    int localNy; ///< Local Ny domain size (the Ny size for the velocity field of the individual process)
+    int localstart; ///< Local starting position of the individual process velocity field in the global array to divide up the initial velocity field
 
 };
 

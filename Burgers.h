@@ -27,15 +27,15 @@ double F77NAME(ddot)(const int& n, const double* dx, const int& incx, const doub
 
 class Burgers {
 public:
-    // * * * * * * * * * * * * * * CONSTRUCTOR * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * * //
 
     Burgers(Model& A);
 
-    // * * * * * * * * * * * * * * DESTRUCTOR  * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * * //
 
     ~Burgers();
 
-    // * * * * * * * * * * * * * * MEMBER FUNCTIONS  * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * //
 
 
     void SetVelField(Model& A); ///< Calculates the initial velocity field from the input parameters
