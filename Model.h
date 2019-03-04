@@ -13,13 +13,16 @@ class Model {
 friend class Burgers;
 public:
 
-    // * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * * * //
 
-    Model(int argc, char *argv[]);
+    Model(int argc, char *argv[]); // Constructor to read parameters from command line
+    Model(); // Empty Constructor
 
     // * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * * //
 
     ~Model();
+
+
 
     // * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * //
 
@@ -29,6 +32,10 @@ public:
 
     // bool   IsVerbose() const { return verbose; } ///< tells user what it does (Extra information)
     // bool   IsHelp()    const { return help; } ///< print out available command line options
+
+
+    int world_rank;
+    int retval, retval_rank, world_size, retval_size, nPx, nPy;
 
     // Getters
     double GetX0() const { return x0; }
@@ -46,9 +53,14 @@ public:
     double GetAy() const { return ay; }
     double GetB() const { return b; }
     double GetC() const { return c; }
+    int GetPx() const { return nPx; }
+    int GetPy() const { return nPy; }
+    int GetLocalNx() const { return localNx; }
+    int GetLocalNy() const { return localNy; }
+    int GetWorldRank() const { return world_rank; }
+    int GetWorldSize() const { return world_size; }
+    int GetLocalStart() const { return localstart; }
 
-    // MPI variables needed
-    int retval, retval_rank, world_rank, world_size, retval_size, nPx, nPy;
 
 private:
 
@@ -82,6 +94,7 @@ private:
     int localNx; ///< Local Nx domain size (the Nx size for the velocity field of the individual process)
     int localNy; ///< Local Ny domain size (the Ny size for the velocity field of the individual process)
     int localstart; ///< Local starting position of the individual process velocity field in the global array to divide up the initial velocity field
+    // MPI variables needed
 
 };
 

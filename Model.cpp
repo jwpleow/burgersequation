@@ -48,6 +48,12 @@ Model::Model(int argc, char *argv[]) {
 
 }
 
+// Empty Constructor
+Model::Model(){
+
+}
+
+
 // Destructor
 Model::~Model() {
 
@@ -55,6 +61,9 @@ Model::~Model() {
     MPI_Finalize();
 
 }
+
+
+
 
 void Model::ParseParameters(int argc, char *argv[]) {
 
@@ -123,4 +132,6 @@ void Model::PrintParameters() {
     std::cout << "ay: " << ay << '\n';
     std::cout << "b:  " << b << '\n';
     std::cout << "c:  " << c << '\n';
+    std::cout << "Px:  " << nPx << '\n';
+    std::cout << "Py:  " << nPy << '\n';
 }

@@ -6,7 +6,6 @@
 #ifndef CLASS_BURGERS
 #define CLASS_BURGERS
 
-#include "mpi.h"
 #include "Model.h"
 #include <stdexcept>
 #include <iostream>
@@ -29,7 +28,7 @@ class Burgers {
 public:
     // * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * * //
 
-    Burgers(Model& A);
+    Burgers(Model& B);
 
     // * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * * //
 
@@ -38,18 +37,18 @@ public:
     // * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * //
 
 
-    void SetVelField(Model& A); ///< Calculates the initial velocity field from the input parameters
+    void SetVelField(); ///< Calculates the initial velocity field from the input parameters
 
     // Functions to display the u and v velocity field, with the top left corner
     // being u(-L/2,-L/2), and the bottom right corner u(L/2,L/2)
-    void DisplayuVelField(Model &A);
-    void DisplayvVelField(Model &A);
+    void DisplayuVelField();
+    void DisplayvVelField();
 
-    void TimeIntegrateVelField(Model &A); ///< Function that time integrates the velocity fields according to Burgers'
+    void TimeIntegrateVelField(); ///< Function that time integrates the velocity fields according to Burgers'
 
-    double EnergyOfVelField(Model &A); ///< Function that returns the total energy of the velocity fields
+    double EnergyOfVelField(); ///< Function that returns the total energy of the velocity fields
 
-    void FilePrintVelFields(Model &A); ///< Function to print the velocity fields to a file "VelocityFields.txt"
+    void FilePrintVelFields(); ///< Function to print the velocity fields to a file "VelocityFields.txt"
 
 
     double* udata() const { return udata_; } ///< Returns Pointer to u data
@@ -57,12 +56,13 @@ public:
 
 private:
 
-    double* udata_;
-    double* vdata_;
-    double* udata_2;
-    double* vdata_2;
-    double* ucombineddata_;
-    double* vcombineddata_;
+    Model *A;
+    double *udata_;
+    double *vdata_;
+    double *udata_2;
+    double *vdata_2;
+    double *ucombineddata_;
+    double *vcombineddata_;
 };
 
 

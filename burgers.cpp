@@ -11,12 +11,10 @@
 *  Written by Joel Leow - 23/02/2019
 */
 #include <chrono>
-#include <iostream>
 
 #include "Model.h"
 #include "Burgers.h"
 
-#include <thread>
 
 int main(int argc, char* argv[]) {
 
@@ -24,17 +22,20 @@ int main(int argc, char* argv[]) {
     Model m(argc, argv); ///< Initialise Model with input command line argument as parameters
     if (m.world_rank == 0) m.PrintParameters(); ///< Print Parameters to make sure they are correct
     Burgers b(m); ///< Initialise the Burgers Class which will contain the data with our parameters from Model
-    b.SetVelField(m); ///< Calculate the initial velocity field
+    b.SetVelField(); ///< Calculate the initial velocity field
 
 
     // Check the time taken for the time integration
     if (m.world_rank == 0) std::cout << "Time integrating velocity field...\n";
     typedef std::chrono::high_resolution_clock hrc;
     typedef std::chrono::milliseconds ms;
+
     hrc::time_point start = hrc::now();
 
     // Time integrate the velocity field
-    b.TimeIntegrateVelField(m);
+    b.TimeIntegrateVelField();
+
+
 
     // Print time taken to time integrate the field
     hrc::time_point end = hrc::now();
@@ -43,10 +44,9 @@ int main(int argc, char* argv[]) {
 
     // Display the Total Energy and print the velocity field to VelocityFields.txt
     if (m.world_rank == 0) {
-        std::cout << "Energy of velocity field: " << std::setprecision(5) << b.EnergyOfVelField(m) << std::endl;
-        b.FilePrintVelFields(m);
+        std::cout << "Energy of velocity field: " << std::setprecision(6) << b.EnergyOfVelField() << std::endl;
+        b.FilePrintVelFields();
     }
-
 
     return 0;
 }
