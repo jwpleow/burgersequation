@@ -108,6 +108,7 @@ void Burgers::TimeIntegrateVelField() {
 
     // Make a temporary pointer for siwtching of data during time iteration
     double *utempptr = nullptr;
+    double *vtempptr = nullptr;
 
     // Precalculate constants used in the for loops
     double cdt_dxsq, cdt_dysq, axdt_dx, aydt_dy, bdt_dx, bdt_dy, const1, const2, const3;
@@ -133,174 +134,113 @@ void Burgers::TimeIntegrateVelField() {
 
     for (int t = 0; t < A->Nt; ++t) { ///< iterate over the timesteps
         // Switch to alternate between using data in udata_/vdata_ and udata_2/vdata_2
-        switch (t % 2) {
-            case 0 :
-                for (int i = 1; i < A->GetLocalNx() - 1; ++i) { ///< i is the column tracker
-                    for (int j = 1; j < A->GetLocalNy() - 1; ++j) { ///< j is the row tracker
-                        udata_2[A->GetLocalNy() * i + j] =
-                                (const3 + bdt_dx * vdata_[A->GetLocalNy() * i + j]) * udata_[A->GetLocalNy() * i + (j - 1)] +
-                                (const1 - bdt_dy * vdata_[A->GetLocalNy() * i + j] +
-                                 bdt_dx * (udata_[A->GetLocalNy() * (i - 1) + j] - udata_[A->GetLocalNy() * i + j])) *
-                                udata_[A->GetLocalNy() * i + j] + cdt_dysq * udata_[A->GetLocalNy() * i + (j + 1)] +
-                                const2 * udata_[A->GetLocalNy() * (i - 1) + j] + cdt_dxsq * udata_[A->GetLocalNy() * (i + 1) + j];
+        for (int i = 1; i < A->GetLocalNx() - 1; ++i) { ///< i is the column tracker
+            for (int j = 1; j < A->GetLocalNy() - 1; ++j) { ///< j is the row tracker
+                udata_2[A->GetLocalNy() * i + j] =
+                        (const3 + bdt_dx * vdata_[A->GetLocalNy() * i + j]) * udata_[A->GetLocalNy() * i + (j - 1)] +
+                        (const1 - bdt_dy * vdata_[A->GetLocalNy() * i + j] +
+                         bdt_dx * (udata_[A->GetLocalNy() * (i - 1) + j] - udata_[A->GetLocalNy() * i + j])) *
+                        udata_[A->GetLocalNy() * i + j] + cdt_dysq * udata_[A->GetLocalNy() * i + (j + 1)] +
+                        const2 * udata_[A->GetLocalNy() * (i - 1) + j] +
+                        cdt_dxsq * udata_[A->GetLocalNy() * (i + 1) + j];
 
-                        vdata_2[A->GetLocalNy() * i + j] =
-                                const3 * vdata_[A->GetLocalNy() * i + (j - 1)] + (const1 - bdt_dx * udata_[A->GetLocalNy() * i + j]
-                                                                                  + bdt_dy *
-                                                                                    (vdata_[A->GetLocalNy() * i + (j - 1)] -
-                                                                                     vdata_[A->GetLocalNy() * i + j])) *
-                                                                                 vdata_[A->GetLocalNy() * i + j] +
-                                cdt_dysq * vdata_[A->GetLocalNy() * i + (j + 1)] +
-                                (const2 + bdt_dx * udata_[A->GetLocalNy() * i + j]) * vdata_[A->GetLocalNy() * (i - 1) + j] +
-                                cdt_dxsq * vdata_[A->GetLocalNy() * (i + 1) + j];
+                vdata_2[A->GetLocalNy() * i + j] =
+                        const3 * vdata_[A->GetLocalNy() * i + (j - 1)] +
+                        (const1 - bdt_dx * udata_[A->GetLocalNy() * i + j]
+                         + bdt_dy *
+                           (vdata_[A->GetLocalNy() * i + (j - 1)] -
+                            vdata_[A->GetLocalNy() * i + j])) *
+                        vdata_[A->GetLocalNy() * i + j] +
+                        cdt_dysq * vdata_[A->GetLocalNy() * i + (j + 1)] +
+                        (const2 + bdt_dx * udata_[A->GetLocalNy() * i + j]) * vdata_[A->GetLocalNy() * (i - 1) + j] +
+                        cdt_dxsq * vdata_[A->GetLocalNy() * (i + 1) + j];
 
-                    }
-                }
-
-                // If not part of rightmost column - Send and receive data from the right
-                if (A->GetWorldRank() / A->GetPy() != A->GetPx() - 1){
-                    MPI_Send(&udata_2[(A->GetLocalNx() - 2) * A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() + A->GetPy(), 4 * A->GetWorldRank(), MPI_COMM_WORLD); ///< Send rightside array to the rightside process
-                    MPI_Recv(&udata_2[(A->GetLocalNx() - 1) * A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() + A->GetPy(), 4 * A->GetWorldRank() + 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive rightside array from the right
-                    MPI_Send(&vdata_2[(A->GetLocalNx() - 2) * A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() + A->GetPy(), 4 * A->GetWorldRank() + 2, MPI_COMM_WORLD); ///< Send rightside array to the rightside process
-                    MPI_Recv(&vdata_2[(A->GetLocalNx() - 1) * A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() + A->GetPy(), 4 * A->GetWorldRank() + 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive rightside array from the right
-                }
-                // If not part of leftmost column - Send and receive data from the left
-                if (A->GetWorldRank() / A->GetPy() != 0){
-                    MPI_Recv(&udata_2[0], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() - A->GetPy(), MPIconst1, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive leftside array from the leftside process
-                    MPI_Send(&udata_2[A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() - A->GetPy(), MPIconst1 + 1, MPI_COMM_WORLD); ///< Send leftside array to the leftside process
-                    MPI_Recv(&vdata_2[0], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() - A->GetPy(), MPIconst1 + 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive leftside array from the leftside process
-                    MPI_Send(&vdata_2[A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() - A->GetPy(), MPIconst1 + 3, MPI_COMM_WORLD); ///< Send leftside array to the leftside process
-
-                }
-                //If not part of topmost row - Send and receive data from the top
-                if (A->GetWorldRank() % A->GetPy() != 0) {
-                    // Prepare an array of values from the 2nd row from the top
-                    for (int i = 0; i < A->GetLocalNx(); ++i) {
-                        utoparraysend[i] = udata_2[i * A->GetLocalNy() + 1];
-                        vtoparraysend[i] = vdata_2[i * A->GetLocalNy() + 1];
-                    }
-                    MPI_Send(utoparraysend, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() - 1, MPIconst2 - 4, MPI_COMM_WORLD); ///< Send top array to the process above
-                    MPI_Recv(utoparrayreceive, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() - 1, MPIconst2 - 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive the top array from the process above
-                    MPI_Send(vtoparraysend, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() - 1, MPIconst2 - 2, MPI_COMM_WORLD); ///< Send top array to the process above
-                    MPI_Recv(vtoparrayreceive, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() - 1, MPIconst2 - 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive the top array from the process above
-                    // After receiving, parse the data into the top row
-                    for (int i = 0; i < A->GetLocalNx(); ++i) {
-                        udata_2[i * A->GetLocalNy()] = utoparrayreceive[i];
-                        vdata_2[i * A->GetLocalNy()] = vtoparrayreceive[i];
-                    }
-                }
-                // If not part of bottom row - Send and receive data from the bottom
-                if (A->GetWorldRank() % A->GetPy() != A->GetPy() - 1) {
-                    // Prepare an array of values from the 2nd row from the bottom
-                    for (int i = 0; i < A->GetLocalNx(); ++i) {
-                        ubtmarraysend[i] = udata_2[i * A->GetLocalNy() + (A->GetLocalNy() - 2)];
-                        vbtmarraysend[i] = vdata_2[i * A->GetLocalNy() + (A->GetLocalNy() - 2)];
-                    }
-                    MPI_Recv(ubtmarrayreceive, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() + 1, MPIconst2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    MPI_Send(ubtmarraysend, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() + 1, MPIconst2 + 1, MPI_COMM_WORLD);
-                    MPI_Recv(vbtmarrayreceive, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() + 1, MPIconst2 + 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    MPI_Send(vbtmarraysend, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() + 1, MPIconst2 + 3, MPI_COMM_WORLD);
-                    // After receiving, parse the data into the bottom row
-                    for (int i = 0; i < A->GetLocalNx(); ++i) {
-                        udata_2[i * A->GetLocalNy() + (A->GetLocalNy() - 1)] = ubtmarrayreceive[i];
-                        vdata_2[i * A->GetLocalNy() + (A->GetLocalNy() - 1)] = vbtmarrayreceive[i];
-                    }
-                }
-                break;
-            case 1 :
-                for (int i = 1; i < A->GetLocalNx() - 1; ++i) { ///< i is the column tracker
-                    for (int j = 1; j < A->GetLocalNy() - 1; ++j) { ///< j is the row tracker
-                        udata_[A->GetLocalNy() * i + j] =
-                                (const3 + bdt_dx * vdata_2[A->GetLocalNy() * i + j]) * udata_2[A->GetLocalNy() * i + (j - 1)] +
-                                (const1 - bdt_dy * vdata_2[A->GetLocalNy() * i + j]
-                                 + bdt_dx * (udata_2[A->GetLocalNy() * (i - 1) + j] - udata_2[A->GetLocalNy() * i + j])) *
-                                udata_2[A->GetLocalNy() * i + j] +
-                                cdt_dysq * udata_2[A->GetLocalNy() * i + (j + 1)] +
-                                const2 * udata_2[A->GetLocalNy() * (i - 1) + j] +
-                                cdt_dxsq * udata_2[A->GetLocalNy() * (i + 1) + j];
-
-                        vdata_[A->GetLocalNy() * i + j] = const3 * vdata_2[A->GetLocalNy() * i + (j - 1)] +
-                                                          (const1 - bdt_dx * udata_2[A->GetLocalNy() * i + j]
-                                                           + bdt_dy * (vdata_2[A->GetLocalNy() * i + (j - 1)] -
-                                                                       vdata_2[A->GetLocalNy() * i + j])) *
-                                                          vdata_2[A->GetLocalNy() * i + j] +
-                                                          cdt_dysq * vdata_2[A->GetLocalNy() * i + (j + 1)] +
-                                                          (const2 + bdt_dx * udata_2[A->GetLocalNy() * i + j]) *
-                                                          vdata_2[A->GetLocalNy() * (i - 1) + j] +
-                                                          cdt_dxsq * vdata_2[A->GetLocalNy() * (i + 1) + j];
-
-
-                    }
-                }
-
-                // If not part of rightmost column - Send and receive data from the right
-                if (A->GetWorldRank() / A->GetPy() != A->GetPx() - 1){
-                    MPI_Send(&udata_[(A->GetLocalNx() - 2) * A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() + A->GetPy(), 4 * A->GetWorldRank(), MPI_COMM_WORLD); ///< Send rightside array to the rightside process
-                    MPI_Recv(&udata_[(A->GetLocalNx() - 1) * A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() + A->GetPy(), 4 * A->GetWorldRank() + 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive rightside array from the right
-                    MPI_Send(&vdata_[(A->GetLocalNx() - 2) * A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() + A->GetPy(), 4 * A->GetWorldRank() + 2, MPI_COMM_WORLD); ///< Send rightside array to the rightside process
-                    MPI_Recv(&vdata_[(A->GetLocalNx() - 1) * A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() + A->GetPy(), 4 * A->GetWorldRank() + 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive rightside array from the right
-                }
-                // If not part of leftmost column - Send and receive data from the left
-                if (A->GetWorldRank() / A->GetPy() != 0){
-                    MPI_Recv(&udata_[0], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() - A->GetPy(), MPIconst1, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive leftside array from the leftside process
-                    MPI_Send(&udata_[A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() - A->GetPy(), MPIconst1 + 1, MPI_COMM_WORLD); ///< Send leftside array to the leftside process
-                    MPI_Recv(&vdata_[0], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() - A->GetPy(), MPIconst1 + 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive leftside array from the leftside process
-                    MPI_Send(&vdata_[A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() - A->GetPy(), MPIconst1 + 3, MPI_COMM_WORLD); ///< Send leftside array to the leftside process
-
-                }
-                //If not part of topmost row - Send and receive data from the top
-                if (A->GetWorldRank() % A->GetPy() != 0) {
-                    // Prepare an array of values from the 2nd row from the top
-                    for (int i = 0; i < A->GetLocalNx(); ++i) {
-                        utoparraysend[i] = udata_[i * A->GetLocalNy() + 1];
-                        vtoparraysend[i] = vdata_[i * A->GetLocalNy() + 1];
-                    }
-                    MPI_Send(utoparraysend, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() - 1, MPIconst2 - 4, MPI_COMM_WORLD); ///< Send top array to the process above
-                    MPI_Recv(utoparrayreceive, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() - 1, MPIconst2 - 3, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive the top array from the process above
-                    MPI_Send(vtoparraysend, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() - 1, MPIconst2 - 2, MPI_COMM_WORLD); ///< Send top array to the process above
-                    MPI_Recv(vtoparrayreceive, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() - 1, MPIconst2 - 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive the top array from the process above
-                    // After receiving, parse the data into the top row
-                    for (int i = 0; i < A->GetLocalNx(); ++i) {
-                        udata_[i * A->GetLocalNy()] = utoparrayreceive[i];
-                        vdata_[i * A->GetLocalNy()] = vtoparrayreceive[i];
-                    }
-                }
-
-                // If not part of bottom row - Send and receive data from the bottom
-                if (A->GetWorldRank() % A->GetPy() != A->GetPy() - 1) {
-                    // Prepare an array of values from the 2nd row from the bottom
-                    for (int i = 0; i < A->GetLocalNx(); ++i) {
-                        ubtmarraysend[i] = udata_[i * A->GetLocalNy() + (A->GetLocalNy() - 2)];
-                        vbtmarraysend[i] = vdata_[i * A->GetLocalNy() + (A->GetLocalNy() - 2)];
-                    }
-                    MPI_Recv(ubtmarrayreceive, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() + 1, MPIconst2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    MPI_Send(ubtmarraysend, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() + 1, MPIconst2 + 1, MPI_COMM_WORLD);
-                    MPI_Recv(vbtmarrayreceive, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() + 1, MPIconst2 + 2, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-                    MPI_Send(vbtmarraysend, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() + 1, MPIconst2 + 3, MPI_COMM_WORLD);
-                    // After receiving, parse the data into the bottom row
-                    for (int i = 0; i < A->GetLocalNx(); ++i) {
-                        udata_[i * A->GetLocalNy() + (A->GetLocalNy() - 1)] = ubtmarrayreceive[i];
-                        vdata_[i * A->GetLocalNy() + (A->GetLocalNy() - 1)] = vbtmarrayreceive[i];
-                    }
-                }
-                break;
-            default : ///< Show an error if the switching somehow breaks
-                std::cout << "Error in switching during time integration";
-                break;
+            }
         }
+
+        // Passing the edges to neighbouring processes
+        // If not part of rightmost column - Send and receive data from the right
+        if (A->GetWorldRank() / A->GetPy() != A->GetPx() - 1) {
+            MPI_Send(&udata_2[(A->GetLocalNx() - 2) * A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE,
+                     A->GetWorldRank() + A->GetPy(), 4 * A->GetWorldRank(),
+                     MPI_COMM_WORLD); ///< Send rightside array to the rightside process
+            MPI_Recv(&udata_2[(A->GetLocalNx() - 1) * A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE,
+                     A->GetWorldRank() + A->GetPy(), 4 * A->GetWorldRank() + 1, MPI_COMM_WORLD,
+                     MPI_STATUS_IGNORE); ///< Receive rightside array from the right
+            MPI_Send(&vdata_2[(A->GetLocalNx() - 2) * A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE,
+                     A->GetWorldRank() + A->GetPy(), 4 * A->GetWorldRank() + 2,
+                     MPI_COMM_WORLD); ///< Send rightside array to the rightside process
+            MPI_Recv(&vdata_2[(A->GetLocalNx() - 1) * A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE,
+                     A->GetWorldRank() + A->GetPy(), 4 * A->GetWorldRank() + 3, MPI_COMM_WORLD,
+                     MPI_STATUS_IGNORE); ///< Receive rightside array from the right
+        }
+        // If not part of leftmost column - Send and receive data from the left
+        if (A->GetWorldRank() / A->GetPy() != 0) {
+            MPI_Recv(&udata_2[0], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() - A->GetPy(), MPIconst1,
+                     MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive leftside array from the leftside process
+            MPI_Send(&udata_2[A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() - A->GetPy(),
+                     MPIconst1 + 1, MPI_COMM_WORLD); ///< Send leftside array to the leftside process
+            MPI_Recv(&vdata_2[0], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() - A->GetPy(), MPIconst1 + 2,
+                     MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive leftside array from the leftside process
+            MPI_Send(&vdata_2[A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE, A->GetWorldRank() - A->GetPy(),
+                     MPIconst1 + 3, MPI_COMM_WORLD); ///< Send leftside array to the leftside process
+
+        }
+        //If not part of topmost row - Send and receive data from the top
+        if (A->GetWorldRank() % A->GetPy() != 0) {
+            // Prepare an array of values from the 2nd row from the top
+            for (int i = 0; i < A->GetLocalNx(); ++i) {
+                utoparraysend[i] = udata_2[i * A->GetLocalNy() + 1];
+                vtoparraysend[i] = vdata_2[i * A->GetLocalNy() + 1];
+            }
+            MPI_Send(utoparraysend, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() - 1, MPIconst2 - 4,
+                     MPI_COMM_WORLD); ///< Send top array to the process above
+            MPI_Recv(utoparrayreceive, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() - 1, MPIconst2 - 3,
+                     MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive the top array from the process above
+            MPI_Send(vtoparraysend, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() - 1, MPIconst2 - 2,
+                     MPI_COMM_WORLD); ///< Send top array to the process above
+            MPI_Recv(vtoparrayreceive, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() - 1, MPIconst2 - 1,
+                     MPI_COMM_WORLD, MPI_STATUS_IGNORE); ///< Receive the top array from the process above
+            // After receiving, parse the data into the top row
+            for (int i = 0; i < A->GetLocalNx(); ++i) {
+                udata_2[i * A->GetLocalNy()] = utoparrayreceive[i];
+                vdata_2[i * A->GetLocalNy()] = vtoparrayreceive[i];
+            }
+        }
+        // If not part of bottom row - Send and receive data from the bottom
+        if (A->GetWorldRank() % A->GetPy() != A->GetPy() - 1) {
+            // Prepare an array of values from the 2nd row from the bottom
+            for (int i = 0; i < A->GetLocalNx(); ++i) {
+                ubtmarraysend[i] = udata_2[i * A->GetLocalNy() + (A->GetLocalNy() - 2)];
+                vbtmarraysend[i] = vdata_2[i * A->GetLocalNy() + (A->GetLocalNy() - 2)];
+            }
+            MPI_Recv(ubtmarrayreceive, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() + 1, MPIconst2, MPI_COMM_WORLD,
+                     MPI_STATUS_IGNORE);
+            MPI_Send(ubtmarraysend, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() + 1, MPIconst2 + 1, MPI_COMM_WORLD);
+            MPI_Recv(vbtmarrayreceive, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() + 1, MPIconst2 + 2,
+                     MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Send(vbtmarraysend, A->GetLocalNx(), MPI_DOUBLE, A->GetWorldRank() + 1, MPIconst2 + 3, MPI_COMM_WORLD);
+            // After receiving, parse the data into the bottom row
+            for (int i = 0; i < A->GetLocalNx(); ++i) {
+                udata_2[i * A->GetLocalNy() + (A->GetLocalNy() - 1)] = ubtmarrayreceive[i];
+                vdata_2[i * A->GetLocalNy() + (A->GetLocalNy() - 1)] = vbtmarrayreceive[i];
+            }
+        }
+
+
+        // Swap pointers so that spatial loops are always using new time data
+        utempptr = udata_;
+        udata_ = udata_2;
+        udata_2 = utempptr;
+        vtempptr = vdata_;
+        vdata_ = vdata_2;
+        vdata_2 = vtempptr;
 
     } ///< timestep close bracket
 
     // Make sure that final data is always in udata_ and vdata_, and frees the memory for the unused case
-    if (A->Nt % 2 == 1) {
-        delete[] udata_;
-        delete[] vdata_;
-        udata_ = udata_2;
-        vdata_ = vdata_2;
-    } else {
-        delete[] udata_2;
-        delete[] vdata_2;
-    }
+    delete[] udata_2;
+    delete[] vdata_2;
 
 
     // * * * * * * * * * * * * * Assembling the velocity field matrix * * * * * * * * * * * * * * //
@@ -356,10 +296,10 @@ void Burgers::TimeIntegrateVelField() {
 
     // Allocate the dynamic memory to hold the information required for assembly in the rank 0 process
     if(A->GetWorldRank() == 0) {
-        lengths = new int[A->world_size]();
-        displs = new int[A->world_size]();
-        localNys = new int[A->world_size]();
-        localNxs = new int[A->world_size]();
+        lengths = new int[A->GetWorldSize()]();
+        displs = new int[A->GetWorldSize()]();
+        localNys = new int[A->GetWorldSize()]();
+        localNxs = new int[A->GetWorldSize()]();
         ureceivebuffer = new double[A->GetNx() * A->GetNy()];
         vreceivebuffer = new double[A->GetNx() * A->GetNy()];
     }
@@ -370,7 +310,7 @@ void Burgers::TimeIntegrateVelField() {
 
     // Calculate the displacement vector from the lengths
     if(A->GetWorldRank() == 0) {
-        for (int i = 1; i < A->world_size; ++i) {
+        for (int i = 1; i < A->GetWorldSize(); ++i) {
             displs[i] = displs[i - 1] + lengths[i - 1];
         }
     }
