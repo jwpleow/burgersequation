@@ -33,10 +33,10 @@ public:
     // bool   IsVerbose() const { return verbose; } ///< tells user what it does (Extra information)
     // bool   IsHelp()    const { return help; } ///< print out available command line options
 
-
-    int world_rank;
-    int retval, retval_rank, world_size, retval_size, nPx, nPy;
-
+    int world_rank; ///< Stores the world rank of the process in MPI_COMM_WORLD
+    int world_size; ///< Stores the world size of MPI_COMM_WORLD
+    int nPx; ///< Stores the number of processes to split the x-domain
+    int nPy; ///< Stores the number of processes to split the y-domain
     // Getters
     double GetX0() const { return x0; }
     double GetY0() const { return y0; }
@@ -91,6 +91,7 @@ private:
     double c;  ///< coefficient c
 
     // MPI variables needed
+
     int localNx; ///< Local Nx domain size (the Nx size for the velocity field of the individual process)
     int localNy; ///< Local Ny domain size (the Ny size for the velocity field of the individual process)
     int localstart; ///< Local starting position of the individual process velocity field in the global array to divide up the initial velocity field

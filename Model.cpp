@@ -9,6 +9,7 @@
 Model::Model(int argc, char *argv[]) {
 
     // Initialise and check MPI
+    int retval, retval_rank, retval_size; ///< Initialise some integers for use in checking MPI initialisation
     retval = MPI_Init(&argc, &argv);
     if(retval != MPI_SUCCESS){
         throw std::runtime_error("An error occurred initialising MPI");
@@ -20,16 +21,16 @@ Model::Model(int argc, char *argv[]) {
         std::cout << "Invalid Communicator!" << std::endl;
     }
 
-
-
+    // Parse and validate the parameters from the command line input
     ParseParameters(argc, argv);
     ValidateParameters(argc);
 
-    // Arrange process ranks in column major format
-    // This section finds the localNx and Ny sizes, as well as the start location of each array
-    // allocate the last columns of processes to have the extra+1 in localNx
-    // (LHS of if is column no., RHS is the columns that will not need to be assigned the extra+1 localNx)
-    // and  find the starting position of the processor grid localNx/Ny array in the global Nx*Ny array
+    // Arrange process ranks in column major format.
+    // This section finds the localNx and localNy sizes for each process,
+    // as well as the location of each local array (in each process) in the global array ('localstart').
+    // Allocate the processes to have 1 extra column/row each (starting from the back) if the number of
+    // columns/rows are not equally divisible.
+    // (This was calculated by ensuring that each process has to work on the same number of columns\rows ideally)
     if (world_rank / nPy > nPx - 1 - ((Nx - 2) % nPx)) {
         localNx = (Nx - 2) / nPx + 2 + 1;
         localstart = (((Nx - 2) / nPx) * (world_rank / nPy) + ((world_rank / nPy) - (nPx - (Nx - 2) % nPx))) * Ny;
@@ -37,7 +38,6 @@ Model::Model(int argc, char *argv[]) {
         localNx = (Nx - 2) / nPx + 2;
         localstart = (((Nx - 2) / nPx) * (world_rank / nPy)) * Ny;
     }
-    // allocate the last rows of the processes to have the extra+1 in localNy (LHS of if is row no., RHS is the rows that will not need to be assigned the extra+1 localNx)
     if (world_rank % nPy > nPy - 1 - ((Ny - 2) % nPy)) {
         localNy = (Ny - 2) / nPy + 2 + 1;
         localstart += ((Ny - 2) / nPy) * (world_rank % nPy) + ((world_rank % nPy) - (nPy - (Ny - 2) % nPy));
@@ -50,7 +50,6 @@ Model::Model(int argc, char *argv[]) {
 
 // Empty Constructor
 Model::Model(){
-
 }
 
 
@@ -67,8 +66,7 @@ Model::~Model() {
 
 void Model::ParseParameters(int argc, char *argv[]) {
 
-    /// Parse argument char array into the relevant variables (sto also checks for invalid datatype args)
-
+    // Parse argument char array into the relevant variables (sto also checks for invalid datatype args)
     Lx = std::stod(argv[1]);
     Ly = std::stod(argv[2]);
     T = std::stod(argv[3]);
@@ -86,6 +84,7 @@ void Model::ParseParameters(int argc, char *argv[]) {
     dt = T / (Nt);
     x0 = -Lx / 2;
     y0 = -Ly / 2;
+
 }
 
 void Model::ValidateParameters(int argc) {
@@ -112,7 +111,6 @@ void Model::ValidateParameters(int argc) {
     }
 
 }
-
 
 
 // Member function to print all parameters

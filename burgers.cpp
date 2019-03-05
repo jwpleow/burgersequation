@@ -15,6 +15,7 @@
 #include "Model.h"
 #include "Burgers.h"
 
+#include <climits>
 
 int main(int argc, char *argv[]) {
 
@@ -43,8 +44,8 @@ int main(int argc, char *argv[]) {
     // Display the Total Energy and print the velocity field to VelocityFields.txt
     if (m.GetWorldRank() == 0) {
         std::cout << "Energy of velocity field: " << std::setprecision(6) << b.EnergyOfVelField() << std::endl;
-        b.FilePrintVelFields();
     }
+    b.FilePrintVelFields();
 
     return 0;
 }
