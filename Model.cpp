@@ -27,10 +27,11 @@ Model::Model(int argc, char *argv[]) {
 
     // Arrange process ranks in column major format.
     // This section finds the localNx and localNy sizes for each process,
-    // as well as the location of each local array (in each process) in the global array ('localstart').
+    // as well as the offset location of each local array (of each process) in the global array ('localstart').
     // Allocate the processes to have 1 extra column/row each (starting from the back) if the number of
-    // columns/rows are not equally divisible.
-    // (This was calculated by ensuring that each process has to work on the same number of columns\rows ideally)
+    // columns/rows are not nicely divisible into the processes. e.g. 13 columns (Nx) and 4 processes (Px) will be divided
+    // to 4-5-5-5 (localNx) such that each process will be operating on 3 columns maximum (Each process operates on localNx - 2 columns)
+    // so as to divide the work as evenly as possible.
     if (world_rank / nPy > nPx - 1 - ((Nx - 2) % nPx)) {
         localNx = (Nx - 2) / nPx + 2 + 1;
         localstart = (((Nx - 2) / nPx) * (world_rank / nPy) + ((world_rank / nPy) - (nPx - (Nx - 2) % nPx))) * Ny;

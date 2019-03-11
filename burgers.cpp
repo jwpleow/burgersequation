@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     b.SetVelField(); ///< Calculate the initial velocity field
 
 
-    // Check the time taken for the time integration
+        // Check the time taken for the time integration
     if (m.GetWorldRank() == 0) std::cout << "Time integrating velocity field...\n";
     typedef std::chrono::high_resolution_clock hrc;
     typedef std::chrono::milliseconds ms;
@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
     hrc::time_point end = hrc::now();
     std::cout << "Rank: " << m.GetWorldRank() << ", Time taken: " << std::chrono::duration_cast<ms>(end - start).count()
               << "ms\n";
+
 
     // Display the Total Energy and print the velocity field to VelocityFields.txt
     if (m.GetWorldRank() == 0) {

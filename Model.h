@@ -28,8 +28,6 @@ public:
 
     void PrintParameters(); ///< Function to display the parameters of the model
 
-    // bool IsValid(); ///< think about writing this and calling immediately after initialisation?
-
     // bool   IsVerbose() const { return verbose; } ///< tells user what it does (Extra information)
     // bool   IsHelp()    const { return help; } ///< print out available command line options
 

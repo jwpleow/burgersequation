@@ -29,40 +29,18 @@ void Burgers::SetVelField() {
 
     double r; ///< Initialise r value
 
-    // Create the array to store combined velocity data
-    ucombineddata_ = new double[A->GetNx() * A->GetNy()]();
-    vcombineddata_ = new double[A->GetNx() * A->GetNy()]();
-
-    // Calculate the initial velocity field in rank 0 process
-    if (A->GetWorldRank() == 0) {
-        for (int i = 0; i < A->GetNx(); ++i) { ///< i is the column index
-            for (int j = 0; j < A->GetNy(); ++j) { ///< j is the row index
-                r = sqrt((A->x0 + i * A->GetDx()) * (A->x0 + i * A->GetDx()) + (A->y0 + j * A->GetDy()) * (A->y0 + j * A->GetDy()));
+    // Calculate the initial velocity field for the local process from its offset position in the global system
+    double c1 = A->x0 + (A->GetLocalStart() / A->GetNy()) * A->GetDx(); ///< Precalculate some constants in the loop
+    double c2 = A->y0 + (A->GetLocalStart() % A->GetNy()) * A->GetDy();
+    for (int i = 0; i < A->GetLocalNx(); ++i) { ///< i is the x direction index
+            for (int j = 0; j < A->GetLocalNy(); ++j) { ///< j is the y direction index
+                r = sqrt((c1 + i * A->GetDx()) * (c1 + i * A->GetDx()) + (c2 + j * A->GetDy()) * (c2 + j * A->GetDy()));
                 if (r <= 1.0) {
-                    ucombineddata_[A->GetNy() * i + j] = 2.0 * pow(1.0 - r, 4) * (4.0 * r + 1);
-                    vcombineddata_[A->GetNy() * i + j] = 2.0 * pow(1.0 - r, 4) * (4.0 * r + 1);
+                    udata_[A->GetLocalNy() * i + j] = 2.0 * pow(1.0 - r, 4) * (4.0 * r + 1);
+                    vdata_[A->GetLocalNy() * i + j] = 2.0 * pow(1.0 - r, 4) * (4.0 * r + 1);
                 }
             }
         }
-    }
-
-    // Broadcast the initial velocity data
-    MPI_Bcast(ucombineddata_, A->GetNx() * A->GetNy() , MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    MPI_Bcast(vcombineddata_, A->GetNx() * A->GetNy() , MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-    // Assign only the relevant local velocity field needed by the individual process
-    for (int i = 0; i < A->GetLocalNx(); ++i) {
-        for (int j = 0; j < A->GetLocalNy(); ++j) {
-            udata_[i * A->GetLocalNy() + j] = ucombineddata_[A->GetLocalStart() + i * A->GetNy() + j];
-            vdata_[i * A->GetLocalNy() + j] = vcombineddata_[A->GetLocalStart() + i * A->GetNy() + j];
-        }
-    }
-
-    // Free the unnecessary dynamic arrays on other processes (used again on rank 0 for the final data)
-    if (A->GetWorldRank() != 0) {
-        delete[] ucombineddata_;
-        delete[] vcombineddata_;
-    }
 
 }
 
@@ -79,6 +57,7 @@ void Burgers::DisplayuVelField() {
         std::cout << '\n';
     }
 }
+
 void Burgers::DisplayvVelField() {
 
     std::cout << "Current v Velocity Field: \n";
@@ -106,7 +85,7 @@ void Burgers::TimeIntegrateVelField() {
     auto *vbtmarraysend = new double[A->GetLocalNx()]();
     auto *vbtmarrayreceive = new double[A->GetLocalNx()]();
 
-    // Make a temporary pointer for siwtching of data during time iteration
+    // Make a temporary pointer for switching of data during time iteration
     double *utempptr = nullptr;
     double *vtempptr = nullptr;
 
@@ -124,8 +103,6 @@ void Burgers::TimeIntegrateVelField() {
     const1 = 1.0 - 2.0 * cdt_dxsq - 2.0 * cdt_dysq - axdt_dx - aydt_dy;
     const2 = (cdt_dxsq + axdt_dx);
     const3 = (cdt_dysq + aydt_dy);
-
-
 
     // Constants used for tags in MPI Send/Receives
     MPIconst1 = 4 * A->GetWorldRank() - (4 * A->GetPy());
@@ -239,14 +216,23 @@ void Burgers::TimeIntegrateVelField() {
 
     } ///< timestep close bracket
 
-    // Frees the memory for the unused case
+    // Frees the memory for the unused case and temporary arrays which are not required anymore
     delete[] udata_2;
     delete[] vdata_2;
-
+    delete[] utoparraysend;
+    delete[] utoparrayreceive;
+    delete[] ubtmarraysend;
+    delete[] ubtmarrayreceive;
+    delete[] vtoparraysend;
+    delete[] vtoparrayreceive;
+    delete[] vbtmarraysend;
+    delete[] vbtmarrayreceive;
 
     // * * * * * * * * * * * * * Assembling the velocity field matrix * * * * * * * * * * * * * * //
 
-    // First, remove the edge columns/rows so that there is no overlapping data
+    // First, 'remove' the edge columns/rows so that there is no overlapping data.
+    // This is done by simply shortening localNx and localNy and placing the
+    // relevant data (minus the overlapping edges) in the top left of the array.
 
     // If not part of rightmost column - remove rightmost column
     if (A->GetWorldRank() / A->GetPy() != A->GetPx() - 1) {
@@ -283,7 +269,6 @@ void Burgers::TimeIntegrateVelField() {
         }
     }
 
-
     // Create an array to receive the data from all processes
     double *ureceivebuffer = nullptr;
     double *vreceivebuffer = nullptr;
@@ -304,6 +289,7 @@ void Burgers::TimeIntegrateVelField() {
         ureceivebuffer = new double[A->GetNx() * A->GetNy()];
         vreceivebuffer = new double[A->GetNx() * A->GetNy()];
     }
+
     // Gather the lengths and local sizes of all the local arrays onto the root process
     MPI_Gather(&myLen, 1, MPI_INT, lengths, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Gather(&A->localNx, 1, MPI_INT, localNxs, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -322,17 +308,21 @@ void Burgers::TimeIntegrateVelField() {
     MPI_Gatherv(vdata_, A->GetLocalNx() * A->GetLocalNy(), MPI_DOUBLE, vreceivebuffer, lengths, displs, MPI_DOUBLE, 0,
                 MPI_COMM_WORLD);
 
+    // Free the local data arrays used which are not required anymore
+    delete[] udata_;
+    delete[] vdata_;
 
     // Arrange the received data on rank 0
     if (A->GetWorldRank() == 0) {
+        ucombineddata_ = new double[A->GetNx() * A->GetNy()](); ///< Create the arrays to store arranged combined velocity data
+        vcombineddata_ = new double[A->GetNx() * A->GetNy()]();
         int yskip = 0;
         int columndisp = 0;
         int totaldisp = 0;
         for (int p = 0; p < A->GetPx(); p++) { ///< skipping to the next process to the right
-            for (int k = 0; k < localNxs[p * A->GetPy()]; k++) { ///< skipping to the next column
+            for (int k = 0; k < localNxs[p * A->GetPy()]; k++) { ///< moving to the next column
                 columndisp = 0; ///< reset the column displacement counter when on a new column
-                for (int j = 0;
-                     j < A->GetPy(); j++) { ///< iterating over the processes below to assemble the entire column
+                for (int j = 0; j < A->GetPy(); j++) { ///< iterating over the processes below to assemble the entire column
                     for (int i = 0; i < localNys[j]; i++) { ///< retrieving a column from a local array
                         ucombineddata_[i + yskip] = ureceivebuffer[i + columndisp + k * localNys[j] + totaldisp];
                         vcombineddata_[i + yskip] = vreceivebuffer[i + columndisp + k * localNys[j] + totaldisp];
@@ -348,19 +338,7 @@ void Burgers::TimeIntegrateVelField() {
         }
     }
 
-
-    // Free the dynamic memory arrays used which are not required anymore
-    delete[] utoparraysend;
-    delete[] utoparrayreceive;
-    delete[] ubtmarraysend;
-    delete[] ubtmarrayreceive;
-    delete[] vtoparraysend;
-    delete[] vtoparrayreceive;
-    delete[] vbtmarraysend;
-    delete[] vbtmarrayreceive;
-    delete[] udata_;
-    delete[] vdata_;
-
+    // Free the dynamic memory arrays used which are not required anymore for the arranging of data on rank 0
     if (A->GetWorldRank() == 0) {
         delete[] lengths;
         delete[] displs;
@@ -415,11 +393,8 @@ void Burgers::FilePrintVelFields() {
 
 // Member function that returns the energy of the velocity field
 double Burgers::EnergyOfVelField() {
-
-    if (A->GetWorldRank() == 0) {
         return 0.5 * (F77NAME(ddot)(A->GetNx() * A->GetNy(), ucombineddata_, 1, ucombineddata_, 1) +
                       F77NAME(ddot)(A->GetNx() * A->GetNy(), vcombineddata_, 1, vcombineddata_, 1)) * A->GetDx() *
                A->GetDy();
-    }
 
 }
