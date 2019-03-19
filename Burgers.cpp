@@ -89,11 +89,11 @@ void Burgers::TimeIntegrateVelField() {
     double *utempptr = nullptr;
     double *vtempptr = nullptr;
 
-    // Precalculate constants used in the for loops
+    // Initialise precalculatable constants used in the for loops
     double cdt_dxsq, cdt_dysq, axdt_dx, aydt_dy, bdt_dx, bdt_dy, const1, const2, const3;
     int MPIconst1, MPIconst2;
 
-    // Constants used in the explicit Forward Euler method
+    // Precalculate constants used in the explicit Forward Euler method
     cdt_dxsq = A->GetC() * A->GetDt() / (A->GetDx() * A->GetDx());
     cdt_dysq = A->GetC() * A->GetDt() / (A->GetDy() * A->GetDy());
     axdt_dx = A->GetAx() * A->GetDt() / A->GetDx();
@@ -112,14 +112,14 @@ void Burgers::TimeIntegrateVelField() {
     // * * * * * * * * * * * * * Time Integration Loop * * * * * * * * * * * * * * * //
 
     for (int t = 0; t < A->Nt; ++t) { ///< iterate over the timesteps
-        // Switch to alternate between using data in udata_/vdata_ and udata_2/vdata_2
         for (int i = 1; i < A->GetLocalNx() - 1; ++i) { ///< i is the column tracker
             for (int j = 1; j < A->GetLocalNy() - 1; ++j) { ///< j is the row tracker
                 udata_2[A->GetLocalNy() * i + j] =
-                        (const3 + bdt_dx * vdata_[A->GetLocalNy() * i + j]) * udata_[A->GetLocalNy() * i + (j - 1)] +
-                        (const1 - bdt_dy * vdata_[A->GetLocalNy() * i + j] +
-                         bdt_dx * (udata_[A->GetLocalNy() * (i - 1) + j] - udata_[A->GetLocalNy() * i + j])) *
-                        udata_[A->GetLocalNy() * i + j] + cdt_dysq * udata_[A->GetLocalNy() * i + (j + 1)] +
+                        (const3 + bdt_dx * vdata_[A->GetLocalNy() * i + j]) * udata_[A->GetLocalNy() * i + (j - 1)]
+                        + (const1 - bdt_dy * vdata_[A->GetLocalNy() * i + j] +
+                           bdt_dx * (udata_[A->GetLocalNy() * (i - 1) + j]
+                                     - udata_[A->GetLocalNy() * i + j])) * udata_[A->GetLocalNy() * i + j]
+                        + cdt_dysq * udata_[A->GetLocalNy() * i + (j + 1)] +
                         const2 * udata_[A->GetLocalNy() * (i - 1) + j] +
                         cdt_dxsq * udata_[A->GetLocalNy() * (i + 1) + j];
 
@@ -232,7 +232,7 @@ void Burgers::TimeIntegrateVelField() {
 
     // First, 'remove' the edge columns/rows so that there is no overlapping data.
     // This is done by simply shortening localNx and localNy and placing the
-    // relevant data (minus the overlapping edges) in the top left of the array.
+    // relevant data (without the overlapping edges) in the 'top left' of the array.
 
     // If not part of rightmost column - remove rightmost column
     if (A->GetWorldRank() / A->GetPy() != A->GetPx() - 1) {
@@ -352,6 +352,7 @@ void Burgers::TimeIntegrateVelField() {
 
 
 // Member function that prints the current velocity fields (in ucombineddata_ and vcombineddata_) to the file VelocityFields.txt
+// Can only call this function after time integration
 void Burgers::FilePrintVelFields() {
 
     // Only the rank 0 process with the combined data should print
@@ -391,7 +392,7 @@ void Burgers::FilePrintVelFields() {
     }
 }
 
-// Member function that returns the energy of the velocity field
+// Member function that returns the energy of the velocity field - Can only call this function after time integration
 double Burgers::EnergyOfVelField() {
         return 0.5 * (F77NAME(ddot)(A->GetNx() * A->GetNy(), ucombineddata_, 1, ucombineddata_, 1) +
                       F77NAME(ddot)(A->GetNx() * A->GetNy(), vcombineddata_, 1, vcombineddata_, 1)) * A->GetDx() *
