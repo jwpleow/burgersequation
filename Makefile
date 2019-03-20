@@ -1,5 +1,5 @@
 CXX = mpicxx
-CXXFLAGS = -std=c++14 -Wall -O2
+CXXFLAGS = -std=c++14 -Wall -O2 -ffast-math -march=native
 
 default: burgpn
 
