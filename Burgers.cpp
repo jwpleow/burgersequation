@@ -139,6 +139,7 @@ void Burgers::TimeIntegrateVelField() {
 
         // Passing the edges to neighbouring processes
         // If not part of rightmost column - Send and receive data from the right
+        // FIX: tags are unnecessarily complicated
         if (A->GetWorldRank() / A->GetPy() != A->GetPx() - 1) {
             MPI_Send(&udata_2[(A->GetLocalNx() - 2) * A->GetLocalNy()], A->GetLocalNy(), MPI_DOUBLE,
                      A->GetWorldRank() + A->GetPy(), 4 * A->GetWorldRank(),
@@ -313,6 +314,7 @@ void Burgers::TimeIntegrateVelField() {
     delete[] vdata_;
 
     // Arrange the received data on rank 0
+    // TODO: this doesn't seem to work 100% of the time for nPx != nPy(?)
     if (A->GetWorldRank() == 0) {
         ucombineddata_ = new double[A->GetNx() * A->GetNy()](); ///< Create the arrays to store arranged combined velocity data
         vcombineddata_ = new double[A->GetNx() * A->GetNy()]();

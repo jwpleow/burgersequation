@@ -1,5 +1,5 @@
 # 2D Burgers' Equation Solver using C++ and MPI 
-- time integration done by a Explicit Forward Euler integration scheme
+- time integration done by an FTCS scheme
 - infinitely scalable (I think...)
 
 
@@ -29,12 +29,9 @@ Parameters of the problem are stored in the Model class (Model.cpp and Model.h),
 
 
 
-Things to fix:
+### Things to fix:
 
-Needlessly complicated MPI tags for send/receives
-
-Split the code used in Burgers::TimeIntegrateVelField() into separate functions
-
-Use a less ghetto solution for cutting rows/columns that does not change the localNx and localNy number
-
-Assembly of submatrices is broken for nPx != nPy
+Needlessly complicated MPI tags for send/receives  
+Split the code used in Burgers::TimeIntegrateVelField() into separate functions  
+Use a less ghetto solution for cutting rows/columns that does not change the localNx and localNy number  
+Assembly of submatrices is broken for nPx != nPy (?)
