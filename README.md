@@ -1,7 +1,7 @@
-# 2D Burgers' Equation Solver using C++ and MPI 
+# Parallel 2D Burgers' Equation Solver using C++ and MPI 
 - time integration done by an FTCS scheme
 - infinitely scalable (I think...)
-
+- Serial (not-parallel) version is included in the other branch!
 
 
 
