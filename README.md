@@ -25,13 +25,3 @@ Boundary conditions are set as u, v = 0 at the edges of the domain.
 Parameters of the problem are stored in the Model class (Model.cpp and Model.h), with data processing done in the Burgers class (Burgers.cpp and Burgers.h), and the functions called in burgers.cpp.
 
  
-
-
-
-
-### Things to fix:
-
-Needlessly complicated MPI tags for send/receives  
-Split the code used in Burgers::TimeIntegrateVelField() into separate functions  
-Use a less ghetto solution for cutting rows/columns that does not change the localNx and localNy number  
-Assembly of submatrices is broken for nPx != nPy (?)
